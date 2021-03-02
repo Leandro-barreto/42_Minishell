@@ -18,6 +18,7 @@ static int	verifychar(char *c, t_lexpar *par)
 		if (*c == '>')
 		{
 			par->i += 1;
+			par->textsize -= 1;
 			return GGREATER;
 		}
 		return GREATER;
@@ -33,10 +34,13 @@ t_tokens	*end_current(t_tokens *tok, t_lex *lex, t_lexpar *par, int length)
 {
 	tok->data[par->j] = '\0';
 	tok->next = malloc(sizeof(t_tokens));
-	start_tokens(tok->next, length);
-	tok = tok->next;
-	par->j = 0;
-	lex->size++;
+	if (length > 0)
+	{
+		start_tokens(tok->next, length);
+		tok = tok->next;
+		par->j = 0;
+		lex->size++;
+	}
 	return (tok);
 }
 
@@ -87,9 +91,9 @@ t_tokens	*lexer2(char *text, t_tokens *tokens, t_lex *lex, t_lexpar *par)
 	{
 		if (par->j > 0)
 			tokens = end_current(tokens, lex, par, 3);
-		tokens->data[par->j++] = par->c;
+		tokens->data[par->j++] = *text;
 		if (par->c == 1240)
-			tokens->data[0] = '>';
+			tokens->data[par->j++] = '>';
 		tokens->type = par->c;
 		tokens = end_current(tokens, lex, par, par->textsize);
 	}
@@ -103,8 +107,6 @@ int			lexer(char *text, t_lex *lex, int textsize)
 	
 	if (lex == NULL)
 		return -1;
-	if (textsize == 0)
-		return 0;
 	par = (t_lexpar *)malloc(sizeof(t_lexpar));
 	start_lexpar(par, textsize);
 	lex->data = malloc(sizeof(t_tokens));
@@ -120,7 +122,7 @@ int			lexer(char *text, t_lex *lex, int textsize)
 		par->textsize--;
 	}
 	if (par->j > 0)
-		tokens = end_current(tokens, lex, par, 1);
+		tokens = end_current(tokens, lex, par, 0);
 	free(par);
 	return (0);
 }
