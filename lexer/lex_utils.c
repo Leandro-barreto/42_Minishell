@@ -20,9 +20,11 @@ void	start_lexer(t_lex* lex)
 {
 	lex->data = malloc(sizeof(t_tokens));
 	lex->size = 0;
+	lex->npipes = NULL;
+	lex->nsemis = 0;
+	lex->curr = 0;
 	lex->error = 0;
 }
-
 
 int		destroy_tokens(t_tokens* tok)
 {

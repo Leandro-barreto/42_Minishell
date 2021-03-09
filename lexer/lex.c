@@ -2,25 +2,21 @@
 #include <string.h> 
 #include <stdio.h> 
 
-static int	verifychar(char *c, t_lexpar *par)
+static int	verifychar(char *c, t_lexpar *par, t_lex *lex)
 {
 	if (*c ==  '\'')
 		return (SQUOTE);
 	else if (*c == '\"')
 		return (DQUOTE);
-	else if (*c == '|')
+	else if (*c == '|' && lex->npipes[lex->curr]++ >= 0)
 		return (PIPE);
-	else if (*c == ';')
+	else if (*c == ';' && lex->curr++ >=0)
 		return (SEMICOLON);
 	else if (*c == '>') 
 	{
 		c++;
-		if (*c == '>')
-		{
-			par->i += 1;
-			par->textsize -= 1;
+		if (*c == '>' && par->i++ >= 0 && par->textsize-- >= 0)
 			return GGREATER;
-		}
 		return GREATER;
 	}
 	else if (*c == '<')
@@ -100,11 +96,26 @@ t_tokens	*lexer2(char *text, t_tokens *tokens, t_lex *lex, t_lexpar *par)
 	return (tokens);
 }
 
+void		count_semis(char *text, t_lex *lex)
+{
+	int	i;
+
+	i = 0;
+	while (text[i])
+	{
+		if (text[i++] == ';')
+			lex->nsemis++;
+	}
+	lex->npipes = (int *)malloc(sizeof(*lex->npipes) * (lex->nsemis + 1));
+	lex->npipes[0] = 0;
+}
+
 int			lexer(char *text, t_lex *lex, int textsize) 
 {
 	t_lexpar	*par;
 	t_tokens	*tokens;
 	
+	count_semis(text, lex);
 	if (lex == NULL)
 		return -1;
 	par = (t_lexpar *)malloc(sizeof(t_lexpar));
@@ -114,7 +125,7 @@ int			lexer(char *text, t_lex *lex, int textsize)
 	start_tokens(tokens, textsize);	
 	while(text[par->i] != '\0' && par->textsize >= 0)
 	{
-		par->c = verifychar(&text[par->i], par);
+		par->c = verifychar(&text[par->i], par, lex);
 		tokens = lexer2(&text[par->i], tokens, lex, par);
 		if (lex->error < 0 )
 			return (destroy_structs(lex, par));
