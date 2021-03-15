@@ -124,7 +124,7 @@ void	execute_cmd(t_cmdTable *cmd)
 			else
 				fdout = dup(tmpout);
 		}
-		else
+		else 
 		{
 			pipe(fdpipe);
 			fdout = fdpipe[1];	
@@ -132,14 +132,16 @@ void	execute_cmd(t_cmdTable *cmd)
 		}
 		dup2(fdout, 1);
 		close(fdout);
-		ret = fork();
-		if (ret == 0)
+		if (cmd->sCmd[i]->builtin == 1)
+			exec_builtin(cmd->sCmd[i]);
+		else
 		{
-			if (cmd->sCmd[i]->builtin == 1)
-				exec_builtin(cmd->sCmd[i]);
-			else
+			ret = fork();
+			if (ret == 0)
+			{
 				execve(cmd->sCmd[i]->args[0], cmd->sCmd[i]->args, g_envp);
-			_exit(1);
+				exit(0);
+			}
 		}
 		i++;
 	}

@@ -1,6 +1,6 @@
 SRC = lex.c lex_utils.c get_next_line.c delete.c execute.c parse.c parse_aux.c\
 	  paths.c
-NAME = Minishell
+NAME = minishell
 LIBRARY=minishell.a
 HEADER = minishell.h
 NUM = $(expr $(cat map.cub | wc -l) - 11)
