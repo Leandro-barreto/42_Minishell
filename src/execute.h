@@ -1,51 +1,9 @@
-#ifndef MINISHELL_H
-# define MINISHELL_H
+#ifndef EXECUTE_H
+# define EXECUTE_H
 
-
-# include "libft/libft.h"
-# include "gnl/get_next_line.h"
-# include <stdio.h>
-# include <unistd.h>
-# include <string.h>
+# include "./libft/libft.h"
+# include "./lexer/lex.h"
 # include <sys/wait.h>
-
-# define PIPE '|'
-# define SQUOTE '\''
-# define DQUOTE '\"'
-# define SEMICOLON ';'
-# define GREATER '>'
-# define GGREATER 1240
-# define LESSER	'<'
-# define WHITESPACE ' '
-# define WORD -1
-
-typedef struct s_tokens t_tokens;
-
-typedef struct	s_lexpar
-{
-	int		c;
-	int		i;
-	int		j;
-	int		textsize;
-}				t_lexpar;
-
-struct			s_tokens 
-{
-	char		*data;
-	int			type;
-	int			quote;
-	t_tokens	*next;
-};
-
-typedef struct	s_lex 
-{
-	t_tokens	*data;
-	int			size;
-	int			*npipes;
-	int			nsemis;
-	int			curr;
-	int			error;
-}				t_lex;
 
 typedef struct	s_simpleCmd
 {
@@ -68,13 +26,6 @@ typedef struct s_cmdTable
 }				t_cmdTable;
 
 char 	**g_envp;
-
-int				destroy_structs(t_lex *lex, t_lexpar *par);
-void			start_tokens(t_tokens *tok, int length);
-int				destroy_tokens(t_tokens* tok);
-void			start_lexpar(t_lexpar *par, int textsize);
-void			start_lexer(t_lex* lex);
-int				lexer(char *text, t_lex *lex, int textsize); 
 
 //Parse.c
 int				parser_all(t_lex *lex, t_cmdTable *cmdtable);

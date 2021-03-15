@@ -1,28 +1,4 @@
-#include "parse.h"
-#include "libft/libft.h"
-#include "lexer/lex.h"
-#include <stdio.h> 
-#include <string.h> 
-
-int		ft_isin(const char *haystack, const char *needle)
-{
-	int	i;
-	int	j;
-
-	write(1, "Isin\n", 5);
-	if (!*needle)
-		return (0);
-	i = ft_strlen(haystack) - 1;
-	j = ft_strlen(needle) - 1;
-	while (haystack[i] == needle[j] && j >= 0)
-	{
-		i--;
-		j--;
-	}
-	if (j == -1)
-		return (1);
-	return (0);
-}
+#include "minishell.h"
 
 int		parse_files(t_tokens *tok, t_cmdTable *cmd, int type)
 {
@@ -50,47 +26,46 @@ int		insertargs(t_tokens *tok, t_cmdTable *cmd, int j)
 	return (0);
 }
 
-int		insertcommand(t_tokens *tok, int size, t_cmdTable *cmd, int j)
+int		insertcommand(char *text, int size, t_cmdTable *cmd, int j)
 {
 	write(1, "Insert cmd\n", 11);
-	printf("J: %i\nSize: %i\n", j, size);
-	fflush(stdout);
+	printf("Args: %i\n", size);
+	printf("Args: %i\n", size);
 	cmd->sCmd[j]->args = (char **)malloc((size + 1) * sizeof(char *));
-	write(1, "A1\n", 3);
 	cmd->sCmd[j]->nAvalArg = size;
 	cmd->sCmd[j]->nArgs = 0;
-	write(1, "A2\n", 3);
-	printf("P: %p\nSize: %s\n", cmd->sCmd[j]->args, tok->data);
-	cmd->sCmd[j]->args[0] = ft_strdup(tok->data);
-	write(1, "A3\n", 3);
+	cmd->sCmd[j]->args[0] = ft_strdup(text);
 	return (1);
 }
 
 int		parse_cmd(t_lex *lex, t_tokens *tok, t_cmdTable *cmd, int j)
 {
-	write(1, "Parse cmd\n", 10);
 	int			count;
 	t_tokens	*tok_aux;
+	char		*text;
 
 	tok_aux = tok;
-	if (ft_isin(tok->data, "echo"))
+	text = ft_strdup(tok->data);
+	cmd->sCmd[j]->builtin = 0;
+	if (ispath(tok->data))
+		text = ft_strdup(tok->data);
+	else if (checkminicmd(tok->data))
+		cmd->sCmd[j]->builtin = 1;
+	else
+		text = checkpathvar("PATH", tok->data);
+	if (text == NULL)
 	{
-		count = 0;
-		while (tok_aux->next && tok_aux->type == 0)
-		{
-			count++;
-			tok_aux = tok_aux->next;
-		}
-		return (insertcommand(tok, count, cmd, j));
+		write(1, "Aqui!!!", 6);
+		lex->error = -15; 	
+		return (lex->error);
 	}
-	else if (ft_isin(tok->data, "cd") || ft_isin(tok->data, "export") ||
-			ft_isin(tok->data, "unset"))
-		return (insertcommand(tok, 2, cmd, j));
-	else if (ft_isin(tok->data, "pwd") || ft_isin(tok->data, "env") ||
-			ft_isin(tok->data, "exit"))
-		return (insertcommand(tok, 1, cmd, j));
-	lex->error = -5;
-	return (-1);
+	count = 0;
+	while (tok_aux->next && tok_aux->type == 0)
+	{
+		count++;
+		tok_aux = tok_aux->next;
+	}
+	return(insertcommand(text, count, cmd, j));
 }
 
 t_cmdTable	start_cmdtable(t_lex *lex, t_cmdTable ct)
@@ -112,7 +87,7 @@ t_cmdTable	start_cmdtable(t_lex *lex, t_cmdTable ct)
 	return (ct);
 }	
 
-int	parser_cmds(t_lex *lex, t_cmdTable *cmdtable)
+int	parser_all(t_lex *lex, t_cmdTable *cmdtable)
 {
 	t_tokens	*tok;
 	int			cmd;
@@ -126,7 +101,6 @@ int	parser_cmds(t_lex *lex, t_cmdTable *cmdtable)
 	write(1, "Parser\n", 7);
 	while (tok->next && !lex->error)
 	{
-		write(1, "While \n", 7);
 		if (tok->type == 0 && !cmd && !redir)
 		{
 			cmd = parse_cmd(lex, tok, &cmdtable[lex->curr], j);
