@@ -35,6 +35,9 @@ typedef struct	s_lex
 {
 	t_tokens	*data;
 	int			size;
+	int			*npipes;
+	int			nsemis;
+	int			curr;
 	int			error;
 }				t_lex;
 

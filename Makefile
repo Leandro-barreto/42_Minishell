@@ -6,7 +6,7 @@ TREE = ./tree
 CMD	 = ./cmd
 EXEC = ./exec
 
-SRCS = minishell.c\
+SRCS = minishell.c parse.c\
 	   $(LEXER)/lex.c $(LEXER)/lex_utils.c\
 
 OBJS = $(SRCS:.c=.o)
