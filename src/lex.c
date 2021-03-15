@@ -124,6 +124,7 @@ int			lexer(char *text, t_lex *lex, int textsize)
 	while(text[par->i] != '\0' && par->textsize >= 0)
 	{
 		par->c = verifychar(&text[par->i], par, lex);
+
 		tokens = lexer2(&text[par->i], tokens, lex, par);
 		if (lex->error < 0 )
 			return (destroy_structs(lex, par));
@@ -131,7 +132,9 @@ int			lexer(char *text, t_lex *lex, int textsize)
 		par->textsize--;
 	}
 	if (par->j > 0)
+
 		tokens = end_current(tokens, lex, par, 0);
+
 	free(par);
 	return (0);
 }

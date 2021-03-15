@@ -1,12 +1,14 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
+
 # include "libft/libft.h"
 # include "gnl/get_next_line.h"
 # include <stdio.h>
 # include <unistd.h>
 # include <string.h>
 # include <sys/wait.h>
+
 # define PIPE '|'
 # define SQUOTE '\''
 # define DQUOTE '\"'
