@@ -3,71 +3,86 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: davi <marvin@42.fr>                        +#+  +:+       +#+        */
+/*   By: lborges- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/05/01 21:18:15 by davi              #+#    #+#             */
-/*   Updated: 2020/05/09 20:22:51 by dmoreira         ###   ########.fr       */
+/*   Created: 2020/02/05 09:59:55 by lborges-          #+#    #+#             */
+/*   Updated: 2020/02/06 16:09:42 by lborges-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void		initialize_gnl(t_gnl *gnl, int fd)
+void	ft_delstr(char **c)
 {
-	if (gnl->status == NULL)
+	if (c != NULL)
 	{
-		gnl->ret = read(fd, gnl->string, BUFFER_SIZE);
-		if (gnl->ret > 0)
-			gnl->value = 1;
-		else if (gnl->ret < 0)
-			gnl->value = -1;
+		free(*c);
+		*c = NULL;
+	}
+}
+
+int		copy_line(char **line, char **s, int fd)
+{
+	int		i;
+	char	*aux;
+
+	i = 0;
+	while (s[fd][i] != '\n' && s[fd][i] != '\0')
+		i++;
+	if (s[fd][i] == '\n')
+	{
+		*line = ft_substr(s[fd], 0, i);
+		aux = ft_strdup(&s[fd][i + 1]);
+		free(s[fd]);
+		s[fd] = aux;
+		if (s[fd][0] == '\0')
+			ft_delstr(&s[fd]);
+	}
+	else
+	{
+		*line = ft_strdup(s[fd]);
+		ft_delstr(&s[fd]);
+		return (0);
+	}
+	return (1);
+}
+
+int		check_read(int ret, char **line, char **s, int fd)
+{
+	if (ret < 0)
+		return (-1);
+	if (ret == 0 && s[fd] == NULL)
+	{
+		*line = ft_calloc(1, 1);
+		return (0);
+	}
+	return (copy_line(line, s, fd));
+}
+
+int		get_next_line(int fd, char **line)
+{
+	char		*buff;
+	static char	*s[10];
+	char		*aux;
+	int			ret;
+
+	if (fd < 0 || line == NULL || BUFFER_SIZE < 1 || read(fd, NULL, 0) < 0)
+		return (-1);
+	buff = (char *)malloc((BUFFER_SIZE + 1) * sizeof(*buff));
+	while ((ret = read(fd, buff, BUFFER_SIZE)) > 0)
+	{
+		buff[ret] = '\0';
+		if (s[fd] == NULL)
+			s[fd] = ft_strdup(buff);
 		else
-			gnl->value = 0;
-		gnl->status = gnl->string;
+		{
+			aux = ft_strjoin(s[fd], buff);
+			free(s[fd]);
+			s[fd] = aux;
+		}
+		if (ft_strchr(s[fd], '\n'))
+			break ;
 	}
-	gnl->nread = 0;
-	gnl->aux_int = 0;
-}
-
-int			get_next_line(int fd, char **line)
-{
-	static	t_gnl gnl;
-
-	if (BUFFER_SIZE <= 0 || fd < 0)
-		return (-1);
-	if (gnl.status == NULL)
-		initialize_gnl(&gnl, fd);
-	if (gnl.ret < 0)
-		return (-1);
-	*line = line_pointer(&gnl, fd);
-	if (gnl.string[gnl.nread] == '\n')
-		gnl.nread += 1;
-	if (gnl.ret < BUFFER_SIZE && gnl.nread > gnl.ret)
-		gnl.value = 0;
-	return (gnl.value);
-}
-
-char		*line_pointer(t_gnl *gnl, int fd)
-{
-	char	*ptr;
-	char	*ptr2;
-
-	gnl->aux_int = gnl->nread;
-	while (gnl->string[gnl->aux_int] != '\n' && (gnl->aux_int < gnl->ret))
-		gnl->aux_int += 1;
-	ptr = ft_substr(gnl->string, gnl->nread, (gnl->aux_int - gnl->nread));
-	while (gnl->string[gnl->aux_int] != '\n' && gnl->value > 0)
-	{
-		gnl->status = NULL;
-		initialize_gnl(gnl, fd);
-		while (gnl->string[gnl->aux_int] != '\n' && gnl->aux_int < gnl->ret)
-			gnl->aux_int += 1;
-		ptr2 = ft_substr(gnl->string, gnl->nread, gnl->aux_int);
-		gnl->aux_char = ptr;
-		ptr = ft_strjoin(gnl->aux_char, ptr2);
-		free(gnl->aux_char);
-		free(ptr2);
-	}
-	gnl->nread = gnl->aux_int;
-	return (ptr);
+	ft_delstr(&buff);
+	return (check_read(ret, line, s, fd));
 }

@@ -3,27 +3,32 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.h                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lborges- <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: davi <marvin@42.fr>                        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/02/02 10:44:48 by lborges-          #+#    #+#             */
-/*   Updated: 2020/02/06 11:33:02 by lborges-         ###   ########.fr       */
+/*   Created: 2020/04/29 14:10:22 by davi              #+#    #+#             */
+/*   Updated: 2020/05/07 16:11:41 by davi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
-# include <limits.h>
-#include "../libft/libft.h"
-# include <limits.h>
-# include <fcntl.h>
+# define BUFFER_SIZE 10
 # include <unistd.h>
-# include <string.h>
+# include <fcntl.h>
 # include <stdlib.h>
 
-int		get_next_line(int fd, char **line);
+typedef	struct	s_gnl
+{
+	char		string[BUFFER_SIZE];
+	char		*aux_char;
+	int			aux_int;
+	int			nread;
+	int			value;
+	char		*status;
+	int			ret;
+}				t_gnl;
 
-#endif
-
-#ifndef BUFFER_SIZE
-# define BUFFER_SIZE 32
+void			initialize_gnl(t_gnl *gnl, int fd);
+int				get_next_line(int fd, char **line);
+char			*line_pointer(t_gnl *gnl, int fd);
 #endif

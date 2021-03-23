@@ -16,7 +16,7 @@ void	start_tokens(t_tokens *tok, int length)
 	tok->quote = 0;
 }
 
-void	start_lexer(t_lex* lex)
+t_lex	start_lexer(t_lex* lex)
 {
 	lex->data = malloc(sizeof(t_tokens));
 	lex->size = 0;
@@ -24,6 +24,8 @@ void	start_lexer(t_lex* lex)
 	lex->nsemis = 0;
 	lex->curr = 0;
 	lex->error = 0;
+	lex->errmsg = NULL;
+	return (*lex);
 }
 
 int		destroy_tokens(t_tokens* tok)

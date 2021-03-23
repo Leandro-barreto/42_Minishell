@@ -40,26 +40,28 @@ int		workingfile(char *file)
 	return (ret);	
 }
 
-char	*ft_returnenvvar(char *name)
+char	*ft_returnenvvar(char *name, char **m_envp)
 {
 	int x;
 
 	x = -1;
+	if (!name)
+		return ("");
  	name = ft_strjoin(name, "=");
- 	while (g_envp[++x])
- 		if (ft_strnstr(g_envp[x], name, ft_strlen(name)))
- 			return (&g_envp[x][ft_strlen(name)]);
- 	return (NULL);
+ 	while (m_envp[++x])
+ 		if (ft_strnstr(m_envp[x], name, ft_strlen(name)))
+ 			return (&m_envp[x][ft_strlen(name)]);
+ 	return ("");
  }
 
-char	*checkpathvar(char *var, char *cmd)
+char	*checkpathvar(char *var, char *cmd, char **m_envp)
 {
 	char	*aux;
 	char	*aux2;
 	int		i[2];
 
 	cmd = ft_strjoin("/", cmd);
-	aux = ft_returnenvvar(var);
+	aux = ft_returnenvvar(var, m_envp);
 	i[0] = 0;
 	i[1] = 0;
 	while (aux[i[0]])
@@ -80,5 +82,5 @@ char	*checkpathvar(char *var, char *cmd)
 	aux2 = ft_strjoin(aux2, cmd);
 	if (workingfile(aux2))
 		return (aux2);
-	return (NULL);
+	return (cmd);
 }

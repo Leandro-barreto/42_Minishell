@@ -12,52 +12,56 @@
 
 #include "minishell.h"
 
-int main(int argc, char *argv[], char **envp)
+void	sighandler(int signum)
+{
+	if (signum == 2)
+		write(1, "\n$mini> ", 8);
+	if (signum == 3)
+		exit(signum);
+}
+
+int		main2(t_lex *lex, t_cmdTable *cmdtable, char **m_envp, char *line)
+{
+	int		n;
+
+	n = lexer(line, lex, n);
+	lex->curr = 0;
+	cmdtable = (t_cmdTable *)malloc(sizeof(t_cmdTable) *(lex->nsemis + 1));
+	cmdtable[lex->curr] = start_cmdtable(lex, cmdtable[lex->curr]);
+	parser_all(lex, cmdtable, m_envp);
+	n = -1;
+	while (++n < (lex->nsemis + 1))
+		if (cmdtable[n].nSimpleCmd)
+			execute_cmd(cmdtable[n], m_envp, lex);
+	if (lex->error < 0)
+		lex->exit = printerror(lex->error, 0, lex->errmsg, 0);
+	delete_table(cmdtable, lex);
+}
+
+int		main(int argc, char *argv[], char **envp)
 {
 	char		*line;
 	int			n;
-	t_lex		lex;
-	// t_tokens	*tok;
+	t_lex		*lex;
 	t_cmdTable	*cmdtable;
+	char		**m_envp;
 
 	if (argc > 2)
 		printf("Pra q tanto argumento? %s", argv[0]);
-	g_envp = envp; 
+	m_envp = envp; 
+	signal(SIGQUIT, sighandler);
+	signal(SIGINT, sighandler);
+	lex = (t_lex *)malloc(sizeof(t_lex));
 	while (1)
 	{
-		start_lexer(&lex);
-		write(1, "$> ", 3);
+		g_run = 0;
+		*lex = start_lexer(lex);
+		write(1, "$mini> ", 7);
 		get_next_line(0, &line);
 		n = ft_strlen(line);
 		if (n == 0)
 			continue ;
-		if (n >= 0)
-			n = lexer(line, &lex, n);
-		lex.curr = 0;
-		cmdtable = (t_cmdTable *)malloc(sizeof(t_cmdTable) *(lex.nsemis + 1));
-		cmdtable[lex.curr] = start_cmdtable(&lex, cmdtable[lex.curr]);
-		parser_all(&lex, cmdtable);
-		if (lex.error < 0)
-			printf("ERROR!! %i\n", lex.error);
-		printf("\n--------Testando tabela de comandos-----------\n");
-		for (int j = 0; (j < (lex.nsemis + 1) && lex.error >= 0); j++)
-		{
-			printf("\n---------Cmds Tabela %i:----------\n", j);
-			for (int k = 0; k < cmdtable[j].nAvalSimpleCmd; k++)
-			{
-				printf("Comando %i: %s\n", k, cmdtable[j].sCmd[k]->args[0]);
-				printf("Builtin %i\n", cmdtable[j].sCmd[k]->builtin); 
-			}
-			printf("Arquivos Tabela %i:\n", j);
-			printf("Infile: %s\nOutfile: %s\n", cmdtable[j].infile, cmdtable[j].outfile);
-		}
-		printf("\n----------Testando comandos-------------\n");
-		for (int j = 0; (j < (lex.nsemis + 1) && lex.error >= 0); j++)
-		{
-			if (cmdtable[j].nAvalSimpleCmd)
-				execute_cmd(&cmdtable[j]);
-		}
-		delete_table(cmdtable, &lex);
+		main2(lex, cmdtable, m_envp, line);
 	}
 	return 0;
 }

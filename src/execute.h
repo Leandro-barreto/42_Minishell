@@ -50,6 +50,7 @@ void	minicd(t_simpleCmd *scmd);
 void	minienv(t_simpleCmd *scmd);
 void	minipwd(t_simpleCmd *scmd);
 void	miniecho(t_simpleCmd *scmd);
+void	miniexit(t_simpleCmd *scmd);
 void	exec_builtin(t_simpleCmd *scmd);
 void	execute_cmd(t_cmdTable *cmd);
 

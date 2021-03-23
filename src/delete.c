@@ -7,18 +7,19 @@ void	delete_table(t_cmdTable *cmdtable, t_lex *lex)
     int k;
 
     i = lex->nsemis;
-    j = -1;
-    k = -1;
-    while (i > 0)
+	write(1, "Del\n", 4);
+    while (i >= 0)
     {
-        while (++j < cmdtable[i].nAvalSimpleCmd)
+		j = 0;
+        while (j < cmdtable[i].nSimpleCmd)
         {
-            while (++k < cmdtable[i].sCmd[j]->nArgs)
-                free(cmdtable[i].sCmd[j]->args[k]);
-            k = -1;
+            k = 0;
+            while (k < cmdtable[i].sCmd[j]->nAvalArg) {
+                free(cmdtable[i].sCmd[j]->args[k++]);
+			}
             free(cmdtable[i].sCmd[j]);
+			j++;
         }
-        j = -1;
         i--;
     }
     free(cmdtable);
