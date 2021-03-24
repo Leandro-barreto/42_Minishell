@@ -81,6 +81,11 @@ typedef struct	s_exec
 	int			i;
 	int			fdpipe[2];
 }				t_exec;
+
+//main
+void			sighandler(int signum);
+
+	
 //Lex.c
 int				lexer(char *text, t_lex *lex, int textsize); 
 
@@ -105,7 +110,7 @@ int				insertcommand(char *text, int size, t_cmdTable *cmd, int j);
 char			*replaceword(char *phrase, char *oldword, char *newword);
 int				insertargs(t_tokens *tok, t_cmdTable *cmd, int j);
 int				parse_files(t_tokens *tok, t_cmdTable *cmd, int type);
-int				checkdollar(t_tokens *tok, t_lex *lex, char **m_envp);
+void			checkdollar(t_tokens *tok, t_lex *lex, char **m_envp);
 int				checkminicmd(char *cmd);
 
 //Path.c
@@ -116,13 +121,13 @@ int				workingfile(char *file);
 int				ispath(char *text);
 
 //Execute.c
-int				exec_builtin(t_simpleCmd *scmd, char **m_envp, t_lex *lex);
-int				execute_cmd(t_cmdTable cmd, char **m_envp, t_lex *lex);
+int				exec_builtin(t_cmdTable *cmd, int i, char **m_envp, t_lex *lex);
+int				execute_cmd(t_cmdTable *cmd, char **m_envp, t_lex *lex);
 
 //Exebuiltin.c
 int				minicd(t_simpleCmd *scmd, char **m_envp);
 int				minienv(t_simpleCmd *scmd, char **m_envp);
-int				miniexit(t_simpleCmd *scmd, t_lex *lex);
+int				miniexit(t_cmdTable *cmd, t_lex *lex, int i);
 int				minipwd(t_simpleCmd *scmd);
 int				miniecho(t_simpleCmd *scmd);
 

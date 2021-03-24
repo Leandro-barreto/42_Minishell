@@ -57,6 +57,15 @@ t_cmdTable	start_cmdtable(t_lex *lex, t_cmdTable ct)
 	return (ct);
 }	
 
+int		parser_normfdp(t_lex *lex, t_cmdTable *cmdtable, int cmd)
+{
+	cmd = 0;
+	lex->j = 0;
+	lex->curr++;
+	cmdtable[lex->curr] = start_cmdtable(lex, cmdtable[lex->curr]);
+	return (cmd);
+}
+
 void	parser_all(t_lex *lex, t_cmdTable *cmdtable, char **m_envp)
 {
 	t_tokens	*tok;
@@ -67,8 +76,9 @@ void	parser_all(t_lex *lex, t_cmdTable *cmdtable, char **m_envp)
 	tok = lex->data;
 	cmd = 0;
 	redir = 0;
-	while (tok && !lex->error && checkdollar(tok, lex, m_envp))
+	while (tok && !lex->error) 
 	{
+		checkdollar(tok, lex, m_envp);
 		if (tok->type == 0 && !cmd && !redir)
 			cmd = parse_cmd(lex, tok, &cmdtable[lex->curr], m_envp);
 		else if (tok->type == 0 && cmd && !redir)
@@ -79,8 +89,8 @@ void	parser_all(t_lex *lex, t_cmdTable *cmdtable, char **m_envp)
 			redir = parse_files(tok, &cmdtable[lex->curr], redir);
 		else if (tok->type == '|')
 			cmd = (lex->j++) * 0;
-		else if (tok->type == ';' && lex->curr++ && !(cmd = 0))
-			cmdtable[lex->curr] = start_cmdtable(lex, cmdtable[lex->curr]);
+		else if (tok->type == ';')
+			cmd = parser_normfdp(lex, cmdtable, cmd);
 		tok = tok->next;
 	}
 }

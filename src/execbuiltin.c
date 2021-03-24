@@ -50,32 +50,39 @@ int		minienv(t_simpleCmd *scmd, char **m_envp)
 	return (0);
 }
 
-int		miniexit(t_simpleCmd *scmd, t_lex *lex)
+int		miniexit(t_cmdTable *cmd, t_lex *lex, int i)
 {
-	int	i;
+	int	j;
 	int	exitvar;
 
-	i = -1;
+	j = -1;
 	exitvar = 0;
-	if (scmd->nArgs > 0 && scmd->args[1][0] == '-')
+	if (cmd->sCmd[i]->nArgs > 0 && cmd->sCmd[i]->args[1][0] == '-')
 	{
-		printf("mini: exit: Invalid option %s\n", scmd->args[1]);
+		printf("mini: exit: Invalid option %s\n", cmd->sCmd[i]->args[1]);
 		exitvar = 1;
 	}
-	else if (scmd->nArgs > 0)
-		while (scmd->args[1][++i])
-        	if (scmd->args[1][i] < '0' || scmd->args[1][i] > '9')
+	else if (cmd->sCmd[i]->nArgs > 0)
+		while (cmd->sCmd[i]->args[1][++j])
+        	if (cmd->sCmd[i]->args[1][j] < '0' || cmd->sCmd[i]->args[1][j] > '9')
 			{
-            	printf("minishell: exit: Illegal number: %s\n", scmd->args[1]);
+            	printf("minishell: exit: Illegal number: %s\n", cmd->sCmd[i]->args[1]);
 				exitvar = 2;
 			}
 	if (exitvar)
 		exit(lex->exit = exitvar);
-	if (scmd->nArgs > 0)
-		exit(lex->exit = ft_atoi(scmd->args[1]));
+	if (cmd->sCmd[i]->nArgs > 0)
+	{
+		j = ft_atoi(cmd->sCmd[i]->args[1]);
+		delete_table(cmd, lex);
+		exit(lex->exit = j);
+	}
 	else
+	{
+		delete_table(cmd, lex);
 		exit(0);
-    return (0);
+	}
+	return (0);
 }
 
 int		minipwd(t_simpleCmd *scmd)

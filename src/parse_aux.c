@@ -27,7 +27,7 @@ char	*replaceword(char *phrase, char *old, char *new)
 	return (rep);
 }
 
-int		checkdollar(t_tokens *tok, t_lex *lex, char **m_envp)
+void	checkdollar(t_tokens *tok, t_lex *lex, char **m_envp)
 {
 	char	*var;
 	char	*new;
@@ -35,7 +35,7 @@ int		checkdollar(t_tokens *tok, t_lex *lex, char **m_envp)
 	int		j;
 
 	if (tok->quote == '\'')
-		return (1);
+		return ;
 	i = -1;
 	while (tok->data[++i])
 	{	
@@ -48,12 +48,12 @@ int		checkdollar(t_tokens *tok, t_lex *lex, char **m_envp)
 			if (tok->data[j] == '?')
 				tok->data = replaceword(tok->data, "?", ft_itoa(lex->exit));
 			else
-				var = ft_substr(tok->data, i + 1, j - 1);
+				var = ft_substr(tok->data, i + 1, j - i - 1);
+			new = ft_returnenvvar(var, m_envp);
+			tok->data = replaceword(tok->data, var, new); 
+			i = -1;
 		}
-		new = ft_returnenvvar(var, m_envp);
-		tok->data = replaceword(tok->data, var, new); 
 	}
-	return (1);
 }
 
 int		checkminicmd(char *cmd)

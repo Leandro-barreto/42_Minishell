@@ -5,16 +5,15 @@ LIBRARY=minishell.a
 HEADER = minishell.h
 NUM = $(expr $(cat map.cub | wc -l) - 11)
 OBJS = $(SRC:.c=.o)
-
 all : $(NAME)
 
-$(NAME): $(OBJS) 
+$(NAME): 
 	(cd gnl/ ; cp get_next_line.c ../)
 	(cd libft/ ; make ; cp libft.a ../$(LIBRARY))
 	gcc -g -Wall -Wextra -Werror -c $(SRC)
 	ar rcs $(LIBRARY) $(OBJS)
 	(rm get_next_line.c)
-	gcc -g -fsanitize=address main.c $(LIBRARY) -o $(NAME)
+	gcc -g main.c $(LIBRARY) -o $(NAME)
 clean:	
 	if [ $(VERO)=1 ]; then rm $(OBJS); VERO=0; fi
 	(cd libft ; make clean)
@@ -26,3 +25,4 @@ fclean: clean
 re: fclean all
 
 
+#-g -fsanitize=address 
