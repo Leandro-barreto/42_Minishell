@@ -34,13 +34,13 @@ void	checkdollar(t_tokens *tok, t_lex *lex, char **m_envp)
 	int		i;
 	int		j;
 
-	if (tok->quote == '\'')
-		return ;
 	i = -1;
-	while (tok->data[++i])
+	while (tok->data[++i] && tok->quote != '\'')
 	{	
 		var = NULL;
-		if (tok->data[i] == '$')
+		if (tok->data[i] == '$' && tok->data[i + 1] != '=' && tok->data[i + 1]
+			&& tok->data[i + 1] != '\"' &&
+			(i == 0 || (i > 0 && tok->data[i - 1] != '\\')))
 		{
 			j = i + 1;
 			while (ft_isalnum(tok->data[j]) || tok->data[j] == '_')

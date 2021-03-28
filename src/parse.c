@@ -2,10 +2,12 @@
 
 int		insertcommand(char *text, int size, t_cmdTable *cmd, int j)
 {
-	cmd->sCmd[j]->args = (char **)malloc((size + 1) * sizeof(char *));
+	printf("Size: %i\n", size);
+	cmd->sCmd[j]->args = (char **)malloc((size + 2) * sizeof(char *));
 	cmd->sCmd[j]->nAvalArg = size + 1;
 	cmd->sCmd[j]->nArgs = 0;
 	cmd->sCmd[j]->args[0] = ft_strdup(text);
+	cmd->sCmd[j]->args[size + 1] = NULL;
 	cmd->nSimpleCmd++;
 	return (1);
 }
@@ -81,7 +83,7 @@ void	parser_all(t_lex *lex, t_cmdTable *cmdtable, char **m_envp)
 		checkdollar(tok, lex, m_envp);
 		if (tok->type == 0 && !cmd && !redir)
 			cmd = parse_cmd(lex, tok, &cmdtable[lex->curr], m_envp);
-		else if (tok->type == 0 && cmd && !redir)
+		else if (tok->type == 0 && cmd && !redir && tok->data[0] != '\0')
 			insertargs(tok, &cmdtable[lex->curr], lex->j);
 		else if (tok->type == '>' || tok->type == '<' || tok->type == GGREATER)
 			redir = tok->type;

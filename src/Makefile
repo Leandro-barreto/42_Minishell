@@ -1,5 +1,6 @@
 SRC = lex.c lex_utils.c lex_utils2.c get_next_line.c delete.c parse.c\
-	  parse_aux.c paths.c export.c unset.c erro.c execute.c execbuiltin.c
+	  parse_aux.c paths.c export.c unset.c erro.c execute.c execbuiltin.c\
+	  echo.c
 NAME = minishell
 LIBRARY=minishell.a
 HEADER = minishell.h

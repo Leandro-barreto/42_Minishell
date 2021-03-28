@@ -1,5 +1,26 @@
 #include "minishell.h"
 
+int		destroy_tokens(t_tokens* tok)
+{
+	if (tok != NULL)
+	{
+		free(tok->data);
+		destroy_tokens(tok->next);
+		free(tok);
+	}
+	return (0);
+}
+
+int		destroy_structs(t_lex *lex, t_lexpar *par)
+{
+	if (par != NULL)
+		free(par);
+	if (lex == NULL)
+		return (0);
+	destroy_tokens(lex->data);
+	return (0);
+}
+
 void	delete_table(t_cmdTable *cmdtable, t_lex *lex)
 {
     int i;
@@ -7,13 +28,15 @@ void	delete_table(t_cmdTable *cmdtable, t_lex *lex)
     int k;
 
     i = lex->nsemis;
+	if (!cmdtable)
+		return ;
     while (i >= 0)
     {
 		j = 0;
         while (j < cmdtable[i].nSimpleCmd)
         {
             k = 0;
-            while (k < cmdtable[i].sCmd[j]->nAvalArg)
+            while (k < cmdtable[i].sCmd[j]->nArgs)
 			{
                 free(cmdtable[i].sCmd[j]->args[k++]);
 			}

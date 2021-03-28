@@ -42,6 +42,30 @@ void	handle_fd(t_exec *exec, t_cmdTable *cmd)
 	close(exec->fdout);
 }
 
+t_simpleCmd	*handlequotes(t_simpleCmd *scmd)
+{
+	int i;
+	int	j;
+	int	size;
+
+	i = -1;
+	while (++i <= scmd->nArgs)
+	{
+		if (scmd->args[i][0] == '\"' || scmd->args[i][0] == '\'')
+		{
+			size = ft_strlen(scmd->args[i]);
+			j = 0;
+			while (j < size - 2)
+			{
+				scmd->args[i][j] = scmd->args[i][j + 1];
+				j++;
+			}
+			scmd->args[i][size - 2] = '\0';
+		}
+	}
+	return (scmd);
+}
+
 void	handle_exec(t_exec *exec, t_cmdTable *cmd, char **m_envp, t_lex *lex)
 {
 	int		i;
@@ -57,9 +81,10 @@ void	handle_exec(t_exec *exec, t_cmdTable *cmd, char **m_envp, t_lex *lex)
 		{
 			signal(SIGINT, NULL);
 			cmdtext = ft_strdup(cmd->sCmd[i]->args[0]);
+			cmd->sCmd[i] = handlequotes(cmd->sCmd[i]);
 			lex->exit = execve(cmdtext, cmd->sCmd[i]->args, m_envp);
 			if (lex->exit < 0)
-				lex->exit = printerror(-127, 0, cmd->sCmd[i]->args[0], 0);	
+				lex->exit = printerror(lex->exit, 0, cmd->sCmd[i]->args[0], 0);	
 			exit(0);
 		}
 	}

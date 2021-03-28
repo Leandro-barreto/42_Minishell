@@ -1,5 +1,34 @@
 #include "minishell.h"
 
+t_tokens	*read_quotes(char *text, t_tokens *tok, t_lex *lex, t_lexpar *par)
+{
+	int i;
+	int	end;
+	int	quote;
+
+	i = -1;
+	quote = text[0];
+	end = 0;
+	while(text[++i] != '\0')
+	{
+		if (i == 0 || (text[i] != quote || text[i - 1] == '\\'))
+			tok->data[par->j++] = text[i];
+		else
+		{
+			tok->data[par->j++] = text[i];
+			end = i;
+			tok->quote = quote;
+			tok = end_current(tok, lex, par, par->textsize);
+			break ;
+		}
+	}
+	if (end == 0)
+		lex->error = -quote;
+	par->i += end;
+	par->textsize -= end;
+	return (tok);
+}
+
 void		count_semis(char *text, t_lex *lex)
 {
 	int	i;

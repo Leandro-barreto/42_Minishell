@@ -9,6 +9,8 @@
 # include <string.h>
 # include <signal.h>
 # include <sys/wait.h>
+# include <sys/types.h>
+# include <dirent.h>
 # define PIPE '|'
 # define SQUOTE '\''
 # define DQUOTE '\"'
@@ -88,6 +90,7 @@ void			sighandler(int signum);
 	
 //Lex.c
 int				lexer(char *text, t_lex *lex, int textsize); 
+t_tokens		*end_current(t_tokens *tok, t_lex *lex, t_lexpar *par, int len);
 
 //lex_utils.c
 int				destroy_structs(t_lex *lex, t_lexpar *par);
@@ -99,6 +102,7 @@ t_lex			start_lexer(t_lex* lex);
 //Lex_utils2.c
 int				checktokens(t_lex *lex, t_tokens *tok);
 void			count_semis(char *text, t_lex *lex);
+t_tokens		*read_quotes(char *txt, t_tokens *t, t_lex *lex, t_lexpar *par);
 
 //Parse.c
 void			parser_all(t_lex *lex, t_cmdTable *cmdtable, char **m_envp);
@@ -129,6 +133,8 @@ int				minicd(t_simpleCmd *scmd, char **m_envp);
 int				minienv(t_simpleCmd *scmd, char **m_envp);
 int				miniexit(t_cmdTable *cmd, t_lex *lex, int i);
 int				minipwd(t_simpleCmd *scmd);
+
+//echo.c
 int				miniecho(t_simpleCmd *scmd);
 
 //Export.c

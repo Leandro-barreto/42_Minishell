@@ -28,24 +28,3 @@ t_lex	start_lexer(t_lex* lex)
 	return (*lex);
 }
 
-int		destroy_tokens(t_tokens* tok)
-{
-	if (tok != NULL)
-	{
-		free(tok->data);
-		destroy_tokens(tok->next);
-		free(tok);
-	}
-	return (0);
-}
-
-int		destroy_structs(t_lex *lex, t_lexpar *par)
-{
-	if (par != NULL)
-		free(par);
-	if (lex == NULL)
-		return (0);
-	destroy_tokens(lex->data);
-	return (0);
-}
-

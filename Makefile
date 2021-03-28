@@ -1,30 +1,44 @@
 NAME = minishell
-LIB = ./libft/libft.a
-LEXER = ./lexer
-PARSER = ./parser
-TREE = ./tree
-CMD	 = ./cmd
-EXEC = ./exec
 
-SRCS = minishell.c\
-	   $(LEXER)/lex.c $(LEXER)/lex_utils.c\
+FLAGS = -Wall -Werror -Wextra 
 
-OBJS = $(SRCS:.c=.o)
-RM = rm -f
-CFLAGS = -Wall -Werror -Wextra
+SRCS = src/main.c		\
+	   src/delete.c	\
+	   src/echo.c	\
+	   src/erro.c		\
+	   src/execbuiltin.c		\
+	   src/execute.c		\
+	   src/export.c		\
+	   src/lex.c		\
+	   src/lex_utils.c		\
+	   src/lex_utils2.c		\
+	   src/parse_aux.c		\
+	   src/parse.c			\
+	   src/paths.c	\
+	   src/unset.c		\
 
-$(NAME): $(OBJS)
-	@cd libft && make
-	@cd lexer && clang $(CFLAGS) -c *.c 
-	@clang $(CFLAGS) $(OBJS) $(LIB) -o $(NAME) 
+OBJS = $(SRCS:.s=.o)
+
+UTILS = src/libft/libft.a 
+		#src/libft/ft_printf/libftprintf.a
+
 all: $(NAME)
 
+$(NAME): $(OBJS)
+	@cd src/libft && make
+	@ar rc $(NAME) $(OBJS) 
+	@clang $(FLAGS) $(OBJS) $(UTILS) -o minishell
+
+%.o: %.c
+	@clang $(FLAGS) $<
+
 clean:
-	$(RM) $(OBJS) 
+	@rm -f $(O)
 
 fclean: clean
-	$(RM) $(NAME)
+	@rm -f $(NAME)
 
 re: fclean all
 
 .PHONY: all clean fclean
+.PRECIOUS: minishell

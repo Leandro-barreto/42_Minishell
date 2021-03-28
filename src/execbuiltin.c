@@ -2,10 +2,13 @@
 
 int		minicd(t_simpleCmd *scmd, char **m_envp)
 {
-	int	i;
-	int	ret;
-	char buf[255];
+	int		i;
+	int		ret;
+	char	buf[255];
+	DIR		*dir;
 
+	write(1, "cd\n", 3);
+	dir = NULL;
 	if (scmd->nArgs > 1)
 		printf("minishell: cd: Pra q tudo isso?!\n");
 	else
@@ -13,8 +16,12 @@ int		minicd(t_simpleCmd *scmd, char **m_envp)
 		if (scmd->nArgs == 0)
 			ret = chdir(ft_returnenvvar("HOME", m_envp)); 
 		else
-			ret = chdir(scmd->args[1]);
-		if (ret < 0)
+		{
+			dir = opendir(scmd->args[1]);
+			if (dir)
+				ret = chdir(scmd->args[1]);
+		}
+		if (!dir || ret < 0)
 			printf("Deu ruim");
 	}
 	i = -1;
@@ -87,8 +94,10 @@ int		miniexit(t_cmdTable *cmd, t_lex *lex, int i)
 
 int		minipwd(t_simpleCmd *scmd)
 {
-	char buf[255];
+	char	buf[255];
+//	DIR		*dir;
 
+	write(1, "wd\n", 3);
 	if (scmd->nArgs > 0 && scmd->args[1][0] == '-')
 	{
 		printf("mini: pwd: Invalid option %s\n", scmd->args[1]);
@@ -96,7 +105,9 @@ int		minipwd(t_simpleCmd *scmd)
 	}
 	else
 	{
-		getcwd(buf, 255);
+		//dir = opendir();
+		//if (dir)
+			getcwd(buf, 255);
 		if (*buf)
 			printf("%s\n", buf);
 		else
@@ -108,24 +119,3 @@ int		minipwd(t_simpleCmd *scmd)
 	return (0);
 }
 
-int		miniecho(t_simpleCmd *scmd)
-{
-	int	i;
-	int	flag;
-
-	i = 1;
-	flag = 0;
-	while ((i <= scmd->nArgs) && !(ft_strncmp(scmd->args[i], "-n", 2)))
-	{
-		i++;
-		flag++;
-	}
-	while (i < scmd->nArgs)
-		printf("%s ", scmd->args[i++]);
-	if (i == scmd->nArgs)
-		printf("%s", scmd->args[i]);
-	if (!flag)
-		printf("\n");
-	fflush(stdout);
-	return (0);
-}

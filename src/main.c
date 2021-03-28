@@ -26,36 +26,64 @@ void	sighandler(int signum)
 		if (g_run)
 			printf("Quit: %d\n", signum);
 		else
-			ft_putstr_fd("\b \b\b \b", 2);
+			ft_putstr_fd("\b \b\b \b", 1);
 	}
 }
 
-int		main2(t_lex *lex, t_cmdTable *cmdtable, char **m_envp, char *line)
+void	main2(t_lex *lex, char **m_envp)
 {
 	int		n;
-
 	t_tokens *tok;
+	t_cmdTable	*cmdtable;
+
 	tok = lex->data;
 	lex->curr = 0;
-	cmdtable = (t_cmdTable *)malloc(sizeof(t_cmdTable) * (lex->nsemis + 1));
-	cmdtable[lex->curr] = start_cmdtable(lex, cmdtable[lex->curr]);
-	parser_all(lex, cmdtable, m_envp);
-	n = -1;
-	g_run = 1;
-	while (++n < (lex->nsemis + 1))
-		if (cmdtable[n].nSimpleCmd)
-			execute_cmd(&cmdtable[n], m_envp, lex);
+	if (lex->error == 0)
+	{
+		cmdtable = (t_cmdTable *)malloc(sizeof(t_cmdTable) * (lex->nsemis + 1));
+		cmdtable[lex->curr] = start_cmdtable(lex, cmdtable[lex->curr]);
+		parser_all(lex, cmdtable, m_envp);
+		n = -1;
+		g_run = 1;
+		while (++n < (lex->nsemis + 1))
+			if (cmdtable[n].nSimpleCmd)
+				execute_cmd(&cmdtable[n], m_envp, lex);
+	}
+	else
+		cmdtable = NULL;
 	if (lex->error < 0)
 		lex->exit = printerror(lex->error, 0, lex->errmsg, 0);
 	delete_table(cmdtable, lex);
 }
 
+char	*readmini(char *line)
+{
+	ssize_t	r;
+	char	*aux;
+
+	r = 1;
+	while (1)
+	{
+		if (!(*line))
+			r = read(1, line, 4096);
+		if (r < 0 || *line == '\0')
+			exit(1);
+		if (line[ft_strlen(line) - 1] == '\n')
+			return (line);
+		else
+		{
+			aux = malloc(4096);
+			r = read(1, aux, 4096);
+			line = ft_strjoin(line, aux);	
+		}
+	}
+	return (line);
+}
+
 int		main(int argc, char *argv[], char **envp)
 {
-	char		*line;
-	int			n;
+	char		line[4097];
 	t_lex		*lex;
-	t_cmdTable	*cmdtable;
 	char		**m_envp;
 
 	if (argc > 2)
@@ -63,21 +91,17 @@ int		main(int argc, char *argv[], char **envp)
 	m_envp = envp; 
 	signal(SIGQUIT, sighandler);
 	signal(SIGINT, sighandler);
-	signal(SIGKILL, sighandler);
 	while (1)
 	{
 		g_run = 0;
 		lex = (t_lex *)malloc(sizeof(t_lex));
 		*lex = start_lexer(lex);
-		write(2, "$mini> ", 7);
-		get_next_line(2, &line);
-		printf("Text: %s", line);
-		fflush(stdout);
-		n = ft_strlen(line);
-		if (n == 0)
-			continue ;
-		n = lexer(line, lex, n);
-		main2(lex, cmdtable, m_envp, line);
+		write(1, "$mini> ", 7);
+		ft_bzero(line, 4096);
+		ft_strlcpy(line, readmini(line), 8192);
+		printf("LLLine: %s \n\n", line);
+		lexer(line, lex, ft_strlen(line));
+		main2(lex, m_envp);
 	}
-	return 0;
+	return (0);
 }
