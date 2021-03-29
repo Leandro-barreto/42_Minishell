@@ -1,6 +1,7 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
+
 # include "libft/libft.h"
 # include "gnl/get_next_line.h"
 # include <errno.h>
@@ -11,6 +12,7 @@
 # include <sys/wait.h>
 # include <sys/types.h>
 # include <dirent.h>
+
 # define PIPE '|'
 # define SQUOTE '\''
 # define DQUOTE '\"'

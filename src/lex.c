@@ -91,11 +91,13 @@ int			lexer(char *text, t_lex *lex, int textsize)
 	{
 		par->c = verifychar(&text[par->i], par, lex);
 		tok = lexer2(&text[par->i], tok, lex, par);
+
 		if (lex->error < 0 )
 			return (destroy_structs(lex, par));
 		par->i++;
 		par->textsize--;
 	}
+
 	tok = end_current(tok, lex, par, 0);
 	free(par);
 	if (lex->data->type == '|' || lex->data->type == ';')
