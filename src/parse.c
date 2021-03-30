@@ -1,44 +1,18 @@
 #include "minishell.h"
 
-int		parse_files(t_tokens *tok, t_cmdTable *cmd, int type)
-{
-	write(1, "Insert Fil\n", 11);
-	if (type == '<')
-		cmd->infile = ft_strdup(tok->data);	
-	else
-	{
-		cmd->outfile = ft_strdup(tok->data);
-		cmd->outtype = type;
-	}
-	return (0);
-}
-
-int		insertargs(t_tokens *tok, t_cmdTable *cmd, int j)
-{
-	int	i;
-
-	write(1, "Insert Arg\n", 11);
-	i = cmd->sCmd[j]->nArgs;
-	if (i >= cmd->sCmd[j]->nAvalArg)
-		return (-1);
-	cmd->sCmd[j]->args[++i] = ft_strdup(tok->data);
-	cmd->sCmd[j]->nArgs++;
-	return (0);
-}
-
 int		insertcommand(char *text, int size, t_cmdTable *cmd, int j)
 {
-	write(1, "Insert cmd\n", 11);
-	printf("Args: %i\n", size);
-	printf("Args: %i\n", size);
-	cmd->sCmd[j]->args = (char **)malloc((size + 1) * sizeof(char *));
-	cmd->sCmd[j]->nAvalArg = size;
+	printf("Size: %i\n", size);
+	cmd->sCmd[j]->args = (char **)malloc((size + 2) * sizeof(char *));
+	cmd->sCmd[j]->nAvalArg = size + 1;
 	cmd->sCmd[j]->nArgs = 0;
 	cmd->sCmd[j]->args[0] = ft_strdup(text);
+	cmd->sCmd[j]->args[size + 1] = NULL;
+	cmd->nSimpleCmd++;
 	return (1);
 }
 
-int		parse_cmd(t_lex *lex, t_tokens *tok, t_cmdTable *cmd, int j)
+int		parse_cmd(t_lex *lex, t_tokens *tok, t_cmdTable *cmd, char **m_envp)
 {
 	int			count;
 	t_tokens	*tok_aux;
@@ -46,26 +20,23 @@ int		parse_cmd(t_lex *lex, t_tokens *tok, t_cmdTable *cmd, int j)
 
 	tok_aux = tok;
 	text = ft_strdup(tok->data);
-	cmd->sCmd[j]->builtin = 0;
+	cmd->sCmd[lex->j]->builtin = 0;
 	if (ispath(tok->data))
 		text = ft_strdup(tok->data);
 	else if (checkminicmd(tok->data))
-		cmd->sCmd[j]->builtin = 1;
+		cmd->sCmd[lex->j]->builtin = 1;
 	else
-		text = checkpathvar("PATH", tok->data);
-	if (text == NULL)
-	{
-		write(1, "Aqui!!!", 6);
-		lex->error = -15; 	
+		text = checkpathvar("PATH", tok->data, m_envp);
+	if (text == NULL && (lex->error = -127) < 0)
 		return (lex->error);
-	}
 	count = 0;
-	while (tok_aux->next && tok_aux->type == 0)
+	while (tok_aux->next && tok_aux->type != '|' && tok_aux->type != ';')
 	{
-		count++;
+		if (tok_aux->type == 0)
+			count++;
 		tok_aux = tok_aux->next;
 	}
-	return(insertcommand(text, count, cmd, j));
+	return(insertcommand(text, count, cmd, lex->j));
 }
 
 t_cmdTable	start_cmdtable(t_lex *lex, t_cmdTable ct)
@@ -73,9 +44,10 @@ t_cmdTable	start_cmdtable(t_lex *lex, t_cmdTable ct)
 	int	aux;
 	int	j;
 	
-	write(1, "Start cmdtable\n", 15);
+	lex->j = 0;
 	aux = 1 + lex->npipes[lex->curr];	
 	ct.nAvalSimpleCmd = aux;
+	ct.nSimpleCmd = 0;
 	ct.sCmd = (t_simpleCmd **)malloc(sizeof(t_simpleCmd *) * aux);
 	j = 0;
 	while (j < aux)
@@ -87,50 +59,40 @@ t_cmdTable	start_cmdtable(t_lex *lex, t_cmdTable ct)
 	return (ct);
 }	
 
-int	parser_all(t_lex *lex, t_cmdTable *cmdtable)
+int		parser_normfdp(t_lex *lex, t_cmdTable *cmdtable, int cmd)
+{
+	cmd = 0;
+	lex->j = 0;
+	lex->curr++;
+	cmdtable[lex->curr] = start_cmdtable(lex, cmdtable[lex->curr]);
+	return (cmd);
+}
+
+void	parser_all(t_lex *lex, t_cmdTable *cmdtable, char **m_envp)
 {
 	t_tokens	*tok;
 	int			cmd;
 	int			redir;
-	int			j;
 
-	j = 0;
+	lex->j = 0;
 	tok = lex->data;
 	cmd = 0;
 	redir = 0;
-	write(1, "Parser\n", 7);
-	while (tok->next && !lex->error)
+	while (tok && !lex->error) 
 	{
+		checkdollar(tok, lex, m_envp);
 		if (tok->type == 0 && !cmd && !redir)
-		{
-			cmd = parse_cmd(lex, tok, &cmdtable[lex->curr], j);
-		}
-		else if (tok->type == 0 && cmd && !redir)
-			insertargs(tok, cmdtable, j);
+			cmd = parse_cmd(lex, tok, &cmdtable[lex->curr], m_envp);
+		else if (tok->type == 0 && cmd && !redir && tok->data[0] != '\0')
+			insertargs(tok, &cmdtable[lex->curr], lex->j);
 		else if (tok->type == '>' || tok->type == '<' || tok->type == GGREATER)
-		{
 			redir = tok->type;
-			cmd = 0;
-		}
-		else if (tok->type == 0 && !cmd && redir)
-		{
+		else if (tok->type == 0 && redir)
 			redir = parse_files(tok, &cmdtable[lex->curr], redir);
-		}
 		else if (tok->type == '|')
-		{	
-			cmd = 0;
-			j++;
-		}
+			cmd = (lex->j++) * 0;
 		else if (tok->type == ';')
-		{	
-			cmd = 0;
-			j = 0;
-			lex->curr++;
-			cmdtable[lex->curr] = start_cmdtable(lex, cmdtable[lex->curr]);
-		}
+			cmd = parser_normfdp(lex, cmdtable, cmd);
 		tok = tok->next;
 	}
-	if (redir && !lex->error)
-		lex->error = -171;
-	return (0);
 }

@@ -16,7 +16,7 @@ void	start_tokens(t_tokens *tok, int length)
 	tok->quote = 0;
 }
 
-void	start_lexer(t_lex* lex)
+t_lex	start_lexer(t_lex* lex)
 {
 	lex->data = malloc(sizeof(t_tokens));
 	lex->size = 0;
@@ -24,26 +24,7 @@ void	start_lexer(t_lex* lex)
 	lex->nsemis = 0;
 	lex->curr = 0;
 	lex->error = 0;
-}
-
-int		destroy_tokens(t_tokens* tok)
-{
-	if (tok != NULL)
-	{
-		free(tok->data);
-		destroy_tokens(tok->next);
-		free(tok);
-	}
-	return (0);
-}
-
-int		destroy_structs(t_lex *lex, t_lexpar *par)
-{
-	if (par != NULL)
-		free(par);
-	if (lex == NULL)
-		return (0);
-	destroy_tokens(lex->data);
-	return (0);
+	lex->errmsg = NULL;
+	return (*lex);
 }
 

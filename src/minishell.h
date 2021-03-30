@@ -4,10 +4,14 @@
 
 # include "libft/libft.h"
 # include "gnl/get_next_line.h"
+# include <errno.h>
 # include <stdio.h>
 # include <unistd.h>
 # include <string.h>
+# include <signal.h>
 # include <sys/wait.h>
+# include <sys/types.h>
+# include <dirent.h>
 
 # define PIPE '|'
 # define SQUOTE '\''
@@ -19,7 +23,8 @@
 # define WHITESPACE ' '
 # define WORD -1
 
-typedef struct s_tokens t_tokens;
+typedef struct	s_tokens t_tokens;
+int				g_run;
 
 typedef struct	s_lexpar
 {
@@ -45,6 +50,9 @@ typedef struct	s_lex
 	int			nsemis;
 	int			curr;
 	int			error;
+	char		*errmsg;
+	int			exit;
+	int			j;
 }				t_lex;
 
 typedef struct	s_simpleCmd
@@ -67,42 +75,80 @@ typedef struct s_cmdTable
 	int			outtype;
 }				t_cmdTable;
 
-char 	**g_envp;
+typedef struct	s_exec
+{
+	int			tmpin;
+	int			tmpout;
+	int			fdin;
+	int			fdout;
+	int			ret;
+	int			i;
+	int			fdpipe[2];
+}				t_exec;
 
+//main
+void			sighandler(int signum);
+
+	
+//Lex.c
+int				lexer(char *text, t_lex *lex, int textsize); 
+t_tokens		*end_current(t_tokens *tok, t_lex *lex, t_lexpar *par, int len);
+
+//lex_utils.c
 int				destroy_structs(t_lex *lex, t_lexpar *par);
 void			start_tokens(t_tokens *tok, int length);
 int				destroy_tokens(t_tokens* tok);
 void			start_lexpar(t_lexpar *par, int textsize);
-void			start_lexer(t_lex* lex);
-int				lexer(char *text, t_lex *lex, int textsize); 
+t_lex			start_lexer(t_lex* lex);
+
+//Lex_utils2.c
+int				checktokens(t_lex *lex, t_tokens *tok);
+void			count_semis(char *text, t_lex *lex);
+t_tokens		*read_quotes(char *txt, t_tokens *t, t_lex *lex, t_lexpar *par);
 
 //Parse.c
-int				parser_all(t_lex *lex, t_cmdTable *cmdtable);
+void			parser_all(t_lex *lex, t_cmdTable *cmdtable, char **m_envp);
 t_cmdTable		start_cmdtable(t_lex *lex, t_cmdTable ct);
-int				parse_cmd(t_lex *lex, t_tokens *tok, t_cmdTable *cmd, int j);
+int				parse_cmd(t_lex *l, t_tokens *t, t_cmdTable *cmd, char **m_env);
 int				insertcommand(char *text, int size, t_cmdTable *cmd, int j);
-int				insertargs(t_tokens *tok, t_cmdTable *cmd, int j);
-int				parse_files(t_tokens *tok, t_cmdTable *cmd, int type);
 
 // Parse_aux
+char			*replaceword(char *phrase, char *oldword, char *newword);
+int				insertargs(t_tokens *tok, t_cmdTable *cmd, int j);
+int				parse_files(t_tokens *tok, t_cmdTable *cmd, int type);
+void			checkdollar(t_tokens *tok, t_lex *lex, char **m_envp);
 int				checkminicmd(char *cmd);
 
 //Path.c
 int				ft_isin(const char *haystack, const char *needle);
-char			*checkpathvar(char *var, char *cmd);
-char			*ft_returnenvvar(char *name);
+char			*checkpathvar(char *var, char *cmd, char **envp);
+char			*ft_returnenvvar(char *name, char **m_envp);
 int				workingfile(char *file);
 int				ispath(char *text);
 
 //Execute.c
-void	minicd(t_simpleCmd *scmd);
-void	minienv(t_simpleCmd *scmd);
-void	minipwd(t_simpleCmd *scmd);
-void	miniecho(t_simpleCmd *scmd);
-void	exec_builtin(t_simpleCmd *scmd);
-void	execute_cmd(t_cmdTable *cmd);
+int				exec_builtin(t_cmdTable *cmd, int i, char **m_envp, t_lex *lex);
+int				execute_cmd(t_cmdTable *cmd, char **m_envp, t_lex *lex);
+
+//Exebuiltin.c
+int				minicd(t_simpleCmd *scmd, char **m_envp);
+int				minienv(t_simpleCmd *scmd, char **m_envp);
+int				miniexit(t_cmdTable *cmd, t_lex *lex, int i);
+int				minipwd(t_simpleCmd *scmd);
+
+//echo.c
+int				miniecho(t_simpleCmd *scmd);
+
+//Export.c
+int				miniexport(t_simpleCmd *scmd, char **m_envp);
+
+//Unset.c
+int				miniunset(t_simpleCmd *scmd, char **m_envp);
 
 //Delete.c
-void	delete_table(t_cmdTable *cmdTable, t_lex *lex);
+void			delete_table(t_cmdTable *cmdTable, t_lex *lex);
+
+//Delete.c
+int				printerror(int err, int func, char *auxstr, int fd);
 
 #endif

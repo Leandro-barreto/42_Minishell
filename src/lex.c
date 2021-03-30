@@ -19,50 +19,33 @@ static int	verifychar(char *c, t_lexpar *par, t_lex *lex)
 	}
 	else if (*c == '<')
 		return LESSER;
+	else if (*c == '\\' && (*(c + 1) == '\'' || *(c + 1) == '\"'))
+	{	
+		par->i++;
+		return 1;
+	}
 	else if (ft_iswhitespace(*c))
 		return WHITESPACE;
-    return 0;
+	return 0;
 }
 
 t_tokens	*end_current(t_tokens *tok, t_lex *lex, t_lexpar *par, int length)
 {
 	tok->data[par->j] = '\0';
-	tok->next = malloc(sizeof(t_tokens));
+	tok->next = (t_tokens *)malloc(sizeof(t_tokens));
 	if (length > 0)
 	{
 		start_tokens(tok->next, length);
 		tok = tok->next;
-		par->j = 0;
+		tok->next = NULL;
 		lex->size++;
+		par->j = 0;
 	}
-	return (tok);
-}
-
-t_tokens	*read_quotes(char *text, t_tokens *tok, t_lex *lex, t_lexpar *par)
-{
-	int i;
-	int	end;
-	int	quote;
-
-	i = 0;
-	quote = text[i];
-	end = 0;
-	while(text[++i] != '\0')
+	else
 	{
-		if (text[i] != quote)
-			tok->data[par->j++] = text[i];
-		else
-		{
-			end = i;
-			tok->quote = quote;
-			tok = end_current(tok, lex, par, par->textsize - i);
-			break ;
-		}
+		lex->size++;
+		tok->next = NULL;
 	}
-	if (end == 0)
-		lex->error = -quote;
-	par->i += end;
-	par->textsize -= end;
 	return (tok);
 }
 
@@ -75,11 +58,8 @@ t_tokens	*lexer2(char *text, t_tokens *tokens, t_lex *lex, t_lexpar *par)
 	}
 	else if (par->c == 0)
 		tokens->data[par->j++] = *text;
-	else if (par->c == WHITESPACE)
-	{
-		if (par->j > 0)
+	else if (par->c == WHITESPACE && par->j > 0)
 			tokens = end_current(tokens, lex, par, par->textsize);
-	}
 	else if (par->c == PIPE || par->c == GREATER || par->c == GGREATER ||
 					par->c == SEMICOLON || par->c == LESSER)
 	{
@@ -91,51 +71,44 @@ t_tokens	*lexer2(char *text, t_tokens *tokens, t_lex *lex, t_lexpar *par)
 		tokens->type = par->c;
 		tokens = end_current(tokens, lex, par, par->textsize);
 	}
+	else if (par->c == 1)
+		tokens->data[par->j++] = *text;
 	return (tokens);
-}
-
-void		count_semis(char *text, t_lex *lex)
-{
-	int	i;
-
-	i = 0;
-	while (text[i])
-	{
-		if (text[i++] == ';')
-			lex->nsemis++;
-	}
-	lex->npipes = (int *)malloc(sizeof(*lex->npipes) * (lex->nsemis + 1));
-	lex->npipes[0] = 0;
 }
 
 int			lexer(char *text, t_lex *lex, int textsize) 
 {
 	t_lexpar	*par;
-	t_tokens	*tokens;
-	
+	t_tokens	*tok;
+
 	count_semis(text, lex);
-	if (lex == NULL)
-		return -1;
 	par = (t_lexpar *)malloc(sizeof(t_lexpar));
 	start_lexpar(par, textsize);
-	lex->data = malloc(sizeof(t_tokens));
-	tokens = lex->data;
-	start_tokens(tokens, textsize);	
+	lex->data = (t_tokens *)malloc(sizeof(t_tokens));
+	tok = lex->data;
+	start_tokens(tok, textsize);	
 	while(text[par->i] != '\0' && par->textsize >= 0)
 	{
 		par->c = verifychar(&text[par->i], par, lex);
+		tok = lexer2(&text[par->i], tok, lex, par);
 
-		tokens = lexer2(&text[par->i], tokens, lex, par);
 		if (lex->error < 0 )
 			return (destroy_structs(lex, par));
 		par->i++;
 		par->textsize--;
 	}
-	if (par->j > 0)
 
-		tokens = end_current(tokens, lex, par, 0);
-
+	tok = end_current(tok, lex, par, 0);
 	free(par);
-	return (0);
+	if (lex->data->type == '|' || lex->data->type == ';')
+		lex->errmsg = ft_strdup(ft_strjoin(lex->data->data, "\'\n"));
+	tok = lex->data;
+	//Descomnetar para imprimir tokens.
+//	while (tok)
+//	{
+//		printf("Data %s\n", tok->data);
+//		tok = tok->next;
+//	}
+	return (checktokens(lex, lex->data));
 }
 
