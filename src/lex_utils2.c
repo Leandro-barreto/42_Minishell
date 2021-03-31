@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   lex_utils2.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lborges- <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/01/20 19:03:49 by lborges-          #+#    #+#             */
+/*   Updated: 2020/01/21 19:04:33 by lborges-         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 t_tokens	*read_quotes(char *text, t_tokens *tok, t_lex *lex, t_lexpar *par)
@@ -9,7 +21,7 @@ t_tokens	*read_quotes(char *text, t_tokens *tok, t_lex *lex, t_lexpar *par)
 	i = -1;
 	quote = text[0];
 	end = 0;
-	while(text[++i] != '\0')
+	while (text[++i] != '\0')
 	{
 		if (i == 0 || (text[i] != quote || text[i - 1] == '\\'))
 			tok->data[par->j++] = text[i];
@@ -41,7 +53,7 @@ void		count_semis(char *text, t_lex *lex)
 		if (text[i] == ';')
 		{
 			lex->nsemis++;
-			flag = 1; 
+			flag = 1;
 		}
 		if (ft_isalnum(text[i]))
 			flag = 0;
@@ -58,20 +70,20 @@ int			checktokens(t_lex *lex, t_tokens *tok)
 		if (tok->type == ';')
 		{
 			if (tok->next && tok->next->type == '|')
-				lex->errmsg = ft_strdup("|\'\n"); 
-			else if (tok->next && tok->next->type == ';') 
-				lex->errmsg = ft_strdup(";;\'\n"); 
+				lex->errmsg = ft_strdup("|\'\n");
+			else if (tok->next && tok->next->type == ';')
+				lex->errmsg = ft_strdup(";;\'\n");
 		}
 		else if (tok->type == '|')
 		{
 			if (tok->next && tok->next->type == '|')
-				lex->errmsg = ft_strdup("||\'\n"); 
-			else if (tok->next && tok->next->type == ';') 
-				lex->errmsg = ft_strdup(";\'\n"); 
+				lex->errmsg = ft_strdup("||\'\n");
+			else if (tok->next && tok->next->type == ';')
+				lex->errmsg = ft_strdup(";\'\n");
 		}
-		else if (tok->type == '>' || tok->type == '<'|| tok->type == GGREATER)
+		else if (tok->type == '>' || tok->type == '<' || tok->type == GGREATER)
 			if (tok->next && tok->next->type != 0)
-				lex->errmsg = ft_strdup("redir\n"); 
+				lex->errmsg = ft_strdup("redir\n");
 		tok = tok->next;
 	}
 	if (lex->errmsg)

@@ -1,28 +1,16 @@
-#include "minishell.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   export.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lborges- <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/01/20 19:03:49 by lborges-          #+#    #+#             */
+/*   Updated: 2020/01/21 19:04:33 by lborges-         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-//char	**sortenv(char **str, int count)
-//{
-//	int		i;
-//	int		j;
-//	char	*temp;
-//
-//	while (i <= count)
-//	{
-//		j = i + 1;
-//		while (j <= count)
-//		{
-//			if (ft_memcmp(str[i], str[j]) > 0)
-//			{
-//				ft_memcpy(temp, str[i]);
-//				ft_memcpy(str[i], str[j]);
-//				ft_memcpy(str[j], temp);
-//			}
-//			j++;
-//		}
-//		i++;
-//	}
-//	return (str);
-//}
+#include "minishell.h"
 
 int		split_once(char *source, char sep, char **var, char **value)
 {
@@ -32,7 +20,7 @@ int		split_once(char *source, char sep, char **var, char **value)
 	int		size;
 
 	matrix[1] = NULL;
-	i= 0;
+	i = 0;
 	size = ft_strlen(source);
 	ret = 0;
 	while (source[i] != sep && source[i])
@@ -42,7 +30,7 @@ int		split_once(char *source, char sep, char **var, char **value)
 	if (i < size)
 	{
 		matrix[0] = ft_substr(source, 0, i + 1);
-		matrix[1] = ft_substr(source, i + 1, size); 
+		matrix[1] = ft_substr(source, i + 1, size);
 	}
 	else
 		matrix[0] = ft_strdup(source);
@@ -56,14 +44,14 @@ void	exportall(char **m_envp, char **var, char **value)
 	int		j;
 
 	j = -1;
-	while(m_envp[++j])
+	while (m_envp[++j])
 	{
 		split_once(m_envp[j], '=', var, value);
 		write(1, "declare -x ", 11);
-	  	ft_putstr_fd(*var, 1);
-		write(1, "=\"", 2);	
-	  	ft_putstr_fd(*value, 1);
-		write(1, "\"\n", 2);	
+		ft_putstr_fd(*var, 1);
+		write(1, "=\"", 2);
+		ft_putstr_fd(*value, 1);
+		write(1, "\"\n", 2);
 	}
 }
 
@@ -116,7 +104,7 @@ int		miniexport(t_simpleCmd *scmd, char **m_envp)
 	{
 		flag = split_once(scmd->args[i], '=', &var, &value);
 		j = -1;
-		while(m_envp[++j] && flag < 2)
+		while (m_envp[++j] && flag < 2)
 			flag = exportnorm(var, value, &m_envp[j], flag);
 		if (flag != 2)
 			flag = add_envp(m_envp, var, value, j);

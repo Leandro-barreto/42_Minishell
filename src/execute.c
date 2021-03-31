@@ -1,42 +1,55 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   execute.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lborges- <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/01/20 19:03:49 by lborges-          #+#    #+#             */
+/*   Updated: 2020/01/21 19:04:33 by lborges-         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
-int		exec_builtin(t_cmdTable *cmd, int i, char **m_envp, t_lex *lex)
+int			exec_builtin(t_cmdTable *cmd, int i, char **m_envp, t_lex *lex)
 {
 	if (!ft_strncmp(cmd->sCmd[i]->args[0], "echo", 4))
-		return(miniecho(cmd->sCmd[i]));
+		return (miniecho(cmd->sCmd[i]));
 	else if (!ft_strncmp(cmd->sCmd[i]->args[0], "cd", 2))
-		return(minicd(cmd->sCmd[i], m_envp));
+		return (minicd(cmd->sCmd[i], m_envp));
 	else if (!ft_strncmp(cmd->sCmd[i]->args[0], "pwd", 3))
-		return(minipwd(cmd->sCmd[i]));
+		return (minipwd(cmd->sCmd[i]));
 	else if (!ft_strncmp(cmd->sCmd[i]->args[0], "env", 3))
-		return(minienv(cmd->sCmd[i], m_envp));
+		return (minienv(cmd->sCmd[i], m_envp));
 	else if (!ft_strncmp(cmd->sCmd[i]->args[0], "unset", 5))
-		return(miniunset(cmd->sCmd[i], m_envp));
+		return (miniunset(cmd->sCmd[i], m_envp));
 	else if (!ft_strncmp(cmd->sCmd[i]->args[0], "export", 6))
-		return(miniexport(cmd->sCmd[i], m_envp));
+		return (miniexport(cmd->sCmd[i], m_envp));
 	else if (!ft_strncmp(cmd->sCmd[i]->args[0], "exit", 4))
-		return(miniexit(cmd, lex, i));
+		return (miniexit(cmd, lex, i));
 	return (12);
 }
 
-void	handle_fd(t_exec *exec, t_cmdTable *cmd)
+void		handle_fd(t_exec *exec, t_cmdTable *cmd)
 {
 	dup2(exec->fdin, 0);
 	close(exec->fdin);
 	if (exec->i == cmd->nSimpleCmd - 1)
 	{
 		if (cmd->outfile && cmd->outtype == '>')
-			exec->fdout = open(cmd->outfile, O_WRONLY|O_CREAT, 0666);
+			exec->fdout = open(cmd->outfile, O_WRONLY | O_CREAT, 0666);
 		else if (cmd->outfile && cmd->outtype == GGREATER)
-			exec->fdout = open(cmd->outfile, O_WRONLY|O_APPEND|O_CREAT, 0666);
+			exec->fdout = open(cmd->outfile, O_WRONLY | O_APPEND |
+					O_CREAT, 0666);
 		else
 			exec->fdout = dup(exec->tmpout);
 	}
-	else 
+	else
 	{
 		pipe(exec->fdpipe);
-		exec->fdout = exec->fdpipe[1];	
-		exec->fdin = exec->fdpipe[0];	
+		exec->fdout = exec->fdpipe[1];
+		exec->fdin = exec->fdpipe[0];
 	}
 	dup2(exec->fdout, 1);
 	close(exec->fdout);
@@ -44,9 +57,9 @@ void	handle_fd(t_exec *exec, t_cmdTable *cmd)
 
 t_simpleCmd	*handlequotes(t_simpleCmd *scmd)
 {
-	int i;
-	int	j;
-	int	size;
+	int		i;
+	int		j;
+	int		size;
 
 	i = -1;
 	while (++i <= scmd->nArgs)
@@ -66,7 +79,7 @@ t_simpleCmd	*handlequotes(t_simpleCmd *scmd)
 	return (scmd);
 }
 
-void	handle_exec(t_exec *exec, t_cmdTable *cmd, char **m_envp, t_lex *lex)
+void		handle_exec(t_exec *exec, t_cmdTable *cmd, char **m_envp, t_lex *lex)
 {
 	int		i;
 	char	*cmdtext;
@@ -84,13 +97,13 @@ void	handle_exec(t_exec *exec, t_cmdTable *cmd, char **m_envp, t_lex *lex)
 			cmd->sCmd[i] = handlequotes(cmd->sCmd[i]);
 			lex->exit = execve(cmdtext, cmd->sCmd[i]->args, m_envp);
 			if (lex->exit < 0)
-				lex->exit = printerror(lex->exit, 0, cmd->sCmd[i]->args[0], 0);	
+				lex->exit = printerror(lex->exit, 0, cmd->sCmd[i]->args[0], 0);
 			exit(0);
 		}
 	}
 }
 
-int		execute_cmd(t_cmdTable *cmd, char **m_envp, t_lex *lex)
+int			execute_cmd(t_cmdTable *cmd, char **m_envp, t_lex *lex)
 {
 	t_exec	*exec;
 
@@ -115,4 +128,3 @@ int		execute_cmd(t_cmdTable *cmd, char **m_envp, t_lex *lex)
 	waitpid(exec->ret, NULL, 0);
 	return (0);
 }
-

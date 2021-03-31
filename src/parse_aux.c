@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parse_aux.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lborges- <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/01/20 19:03:49 by lborges-          #+#    #+#             */
+/*   Updated: 2020/01/21 19:04:33 by lborges-         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
-char	*replaceword(char *phrase, char *old, char *new)
+char		*replaceword(char *phrase, char *old, char *new)
 {
 	char	*rep;
 	int		size;
@@ -9,7 +21,7 @@ char	*replaceword(char *phrase, char *old, char *new)
 
 	if (!old)
 		return (phrase);
-	size = ft_strlen(phrase) + ft_strlen(new) - ft_strlen(old); 
+	size = ft_strlen(phrase) + ft_strlen(new) - ft_strlen(old);
 	rep = (char *)malloc(size + 1);
 	i = -1;
 	while (phrase[++i] != '$')
@@ -17,17 +29,17 @@ char	*replaceword(char *phrase, char *old, char *new)
 	j = -1;
 	while (new[++j])
 		rep[i + j] = new[j];
-	size = ft_strlen(old); 
+	size = ft_strlen(old);
 	while (phrase[i + size + 1])
 	{
- 		rep[i + j] = phrase[i + size + 1];
+		rep[i + j] = phrase[i + size + 1];
 		i++;
 	}
 	rep[i + j] = '\0';
 	return (rep);
 }
 
-void	checkdollar(t_tokens *tok, t_lex *lex, char **m_envp)
+void		checkdollar(t_tokens *tok, t_lex *lex, char **m_envp)
 {
 	char	*var;
 	char	*new;
@@ -36,7 +48,7 @@ void	checkdollar(t_tokens *tok, t_lex *lex, char **m_envp)
 
 	i = -1;
 	while (tok->data[++i] && tok->quote != '\'')
-	{	
+	{
 		var = NULL;
 		if (tok->data[i] == '$' && tok->data[i + 1] != '=' && tok->data[i + 1]
 			&& tok->data[i + 1] != '\"' &&
@@ -50,46 +62,46 @@ void	checkdollar(t_tokens *tok, t_lex *lex, char **m_envp)
 			else
 				var = ft_substr(tok->data, i + 1, j - i - 1);
 			new = ft_returnenvvar(var, m_envp);
-			tok->data = replaceword(tok->data, var, new); 
+			tok->data = replaceword(tok->data, var, new);
 			i = -1;
 		}
 	}
 }
 
-int		checkminicmd(char *cmd)
+int			checkminicmd(char *cmd)
 {
-	if (!ft_strncmp(cmd, "cd", 2) || !ft_strncmp(cmd, "export", 6) ||                           
-		!ft_strncmp(cmd, "unset", 5) ||  !ft_strncmp(cmd, "pwd", 3) ||
-		!ft_strncmp(cmd, "env", 3) || !ft_strncmp(cmd, "exit", 4) ||
-		!ft_strncmp(cmd, "echo", 4))                                             
+	if (!ft_strncmp(cmd, "cd", 2) || !ft_strncmp(cmd, "export", 6) ||
+			!ft_strncmp(cmd, "unset", 5) || !ft_strncmp(cmd, "pwd", 3) ||
+			!ft_strncmp(cmd, "env", 3) || !ft_strncmp(cmd, "exit", 4) ||
+			!ft_strncmp(cmd, "echo", 4))
 	{
 		return (1);
 	}
 	return (0);
 }
 
-int		parse_files(t_tokens *tok, t_cmdTable *cmd, int type)
+int			parse_files(t_tokens *tok, t_cmdTable *cmd, int type)
 {
-	int	fd;
+	int		fd;
 
 	if (type == '<')
-		cmd->infile = ft_strdup(tok->data);	
+		cmd->infile = ft_strdup(tok->data);
 	else
 	{
 		cmd->outfile = ft_strdup(tok->data);
 		cmd->outtype = type;
 		if (type == '>')
-			fd = open(tok->data, O_WRONLY|O_CREAT, 0666);
+			fd = open(tok->data, O_WRONLYi | O_CREAT, 0666);
 		else
-			fd = open(tok->data, O_WRONLY|O_APPEND|O_CREAT, 0666);
+			fd = open(tok->data, O_WRONLY | O_APPEND | O_CREAT, 0666);
 		close(fd);
 	}
 	return (0);
 }
 
-int		insertargs(t_tokens *tok, t_cmdTable *cmd, int j)
+int			insertargs(t_tokens *tok, t_cmdTable *cmd, int j)
 {
-	int	i;
+	int		i;
 
 	i = cmd->sCmd[j]->nArgs;
 	if (i >= cmd->sCmd[j]->nAvalArg)

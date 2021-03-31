@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   execbuiltin.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lborges- <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/01/20 19:03:49 by lborges-          #+#    #+#             */
+/*   Updated: 2020/01/21 19:04:33 by lborges-         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
-int		minicd(t_simpleCmd *scmd, char **m_envp)
+int			minicd(t_simpleCmd *scmd, char **m_envp)
 {
 	int		i;
 	int		ret;
@@ -14,7 +26,7 @@ int		minicd(t_simpleCmd *scmd, char **m_envp)
 	else
 	{
 		if (scmd->nArgs == 0)
-			ret = chdir(ft_returnenvvar("HOME", m_envp)); 
+			ret = chdir(ft_returnenvvar("HOME", m_envp));
 		else
 		{
 			dir = opendir(scmd->args[1]);
@@ -25,8 +37,8 @@ int		minicd(t_simpleCmd *scmd, char **m_envp)
 			printf("Deu ruim");
 	}
 	i = -1;
-	getcwd(buf, 255); 	
-	while(m_envp[++i])
+	getcwd(buf, 255);
+	while (m_envp[++i])
 		if (ft_strnstr(m_envp[i], "PWD", 3))
 		{
 			m_envp[i] = ft_strjoin("PWD=", buf);
@@ -36,9 +48,9 @@ int		minicd(t_simpleCmd *scmd, char **m_envp)
 	return (ret);
 }
 
-int		minienv(t_simpleCmd *scmd, char **m_envp)
+int			minienv(t_simpleCmd *scmd, char **m_envp)
 {
-	int	i;
+	int		i;
 
 	i = -1;
 	if (scmd->nArgs > 0)
@@ -48,7 +60,7 @@ int		minienv(t_simpleCmd *scmd, char **m_envp)
 	}
 	else
 	{
-		while(m_envp[++i])
+		while (m_envp[++i])
 		{
 			printf("%s\n", m_envp[i]);
 			fflush(stdout);
@@ -57,10 +69,10 @@ int		minienv(t_simpleCmd *scmd, char **m_envp)
 	return (0);
 }
 
-int		miniexit(t_cmdTable *cmd, t_lex *lex, int i)
+int			miniexit(t_cmdTable *cmd, t_lex *lex, int i)
 {
-	int	j;
-	int	exitvar;
+	int		j;
+	int		exitvar;
 
 	j = -1;
 	exitvar = 0;
@@ -71,9 +83,9 @@ int		miniexit(t_cmdTable *cmd, t_lex *lex, int i)
 	}
 	else if (cmd->sCmd[i]->nArgs > 0)
 		while (cmd->sCmd[i]->args[1][++j])
-        	if (cmd->sCmd[i]->args[1][j] < '0' || cmd->sCmd[i]->args[1][j] > '9')
+			if (cmd->sCmd[i]->args[1][j] < '0' || cmd->sCmd[i]->args[1][j] > '9')
 			{
-            	printf("minishell: exit: Illegal number: %s\n", cmd->sCmd[i]->args[1]);
+				printf("minishell: exit: Illegal number: %s\n", cmd->sCmd[i]->args[1]);
 				exitvar = 2;
 			}
 	if (exitvar)
@@ -92,11 +104,10 @@ int		miniexit(t_cmdTable *cmd, t_lex *lex, int i)
 	return (0);
 }
 
-int		minipwd(t_simpleCmd *scmd)
+int			minipwd(t_simpleCmd *scmd)
 {
 	char	buf[255];
 //	DIR		*dir;
-
 	write(1, "wd\n", 3);
 	if (scmd->nArgs > 0 && scmd->args[1][0] == '-')
 	{
@@ -105,9 +116,9 @@ int		minipwd(t_simpleCmd *scmd)
 	}
 	else
 	{
-		//dir = opendir();
-		//if (dir)
-			getcwd(buf, 255);
+//		dir = opendir();
+//		if (dir)
+		getcwd(buf, 255);
 		if (*buf)
 			printf("%s\n", buf);
 		else
@@ -118,4 +129,3 @@ int		minipwd(t_simpleCmd *scmd)
 	}
 	return (0);
 }
-
