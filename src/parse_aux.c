@@ -91,7 +91,7 @@ int			parse_files(t_tokens *tok, t_cmdTable *cmd, int type)
 		cmd->outfile = ft_strdup(tok->data);
 		cmd->outtype = type;
 		if (type == '>')
-			fd = open(tok->data, O_WRONLYi | O_CREAT, 0666);
+			fd = open(tok->data, O_WRONLY | O_CREAT, 0666);
 		else
 			fd = open(tok->data, O_WRONLY | O_APPEND | O_CREAT, 0666);
 		close(fd);
