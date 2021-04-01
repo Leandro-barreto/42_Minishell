@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   read.c                                             :+:      :+:    :+:   */
+/*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lborges- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -12,9 +12,8 @@
 
 #include "minishell.h"
 
-void	sighandler(int signum)
+void			sighandler(int signum)
 {
-	//printf("Quit: %d\n", signum);;
 	if (signum == 2 && signum == SIGINT)
 	{
 		write(1, "\n", 1);
@@ -30,10 +29,10 @@ void	sighandler(int signum)
 	}
 }
 
-void	main2(t_lex *lex, char **m_envp)
+void			main2(t_lex *lex, char **m_envp)
 {
-	int		n;
-	t_tokens *tok;
+	int			n;
+	t_tokens	*tok;
 	t_cmdTable	*cmdtable;
 
 	tok = lex->data;
@@ -56,10 +55,10 @@ void	main2(t_lex *lex, char **m_envp)
 	delete_table(cmdtable, lex);
 }
 
-char	*readmini(char *line)
+char			*readmini(char *line)
 {
-	ssize_t	r;
-	char	*aux;
+	ssize_t		r;
+	char		*aux;
 
 	r = 1;
 	while (1)
@@ -74,13 +73,13 @@ char	*readmini(char *line)
 		{
 			aux = malloc(4096);
 			r = read(1, aux, 4096);
-			line = ft_strjoin(line, aux);	
+			line = ft_strjoin(line, aux);
 		}
 	}
 	return (line);
 }
 
-int		main(int argc, char *argv[], char **envp)
+int				main(int argc, char *argv[], char **envp)
 {
 	char		line[4097];
 	t_lex		*lex;
@@ -88,7 +87,7 @@ int		main(int argc, char *argv[], char **envp)
 
 	if (argc > 2)
 		printf("Pra q tanto argumento? %s", argv[0]);
-	m_envp = envp; 
+	m_envp = envp;
 	signal(SIGQUIT, sighandler);
 	signal(SIGINT, sighandler);
 	while (1)
