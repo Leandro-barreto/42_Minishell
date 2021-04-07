@@ -39,33 +39,32 @@ char		*replaceword(char *phrase, char *old, char *new)
 	return (rep);
 }
 
-void		checkdollar(t_tokens *tok, t_lex *lex, char **m_envp)
+char		*checkdollar(char *data, t_lex *lex, char **m_envp)
 {
 	char	*var;
-	char	*new;
 	int		i;
 	int		j;
 
 	i = -1;
-	while (tok->data[++i] && tok->quote != '\'')
+	while (data[++i] && data[i] != '\'')
 	{
 		var = NULL;
-		if (tok->data[i] == '$' && tok->data[i + 1] != '=' && tok->data[i + 1]
-			&& tok->data[i + 1] != '\"' &&
-			(i == 0 || (i > 0 && tok->data[i - 1] != '\\')))
+		if (data[i] == '$' && data[i + 1] != '=' && data[i + 1]
+			&& data[i + 1] != '\"' &&
+			(i == 0 || (i > 0 && data[i - 1] != '\\')))
 		{
 			j = i + 1;
-			while (ft_isalnum(tok->data[j]) || tok->data[j] == '_')
+			while (ft_isalnum(data[j]) || data[j] == '_')
 				j++;
-			if (tok->data[j] == '?')
-				tok->data = replaceword(tok->data, "?", ft_itoa(lex->exit));
+			if (data[j] == '?')
+				data = replaceword(data, "?", ft_itoa(lex->exit));
 			else
-				var = ft_substr(tok->data, i + 1, j - i - 1);
-			new = ft_returnenvvar(var, m_envp);
-			tok->data = replaceword(tok->data, var, new);
+				var = ft_substr(data, i + 1, j - i - 1);
+			data = replaceword(data, var, ft_returnenvvar(var, m_envp));
 			i = -1;
 		}
 	}
+	return (data);
 }
 
 int			checkminicmd(char *cmd)
@@ -80,7 +79,7 @@ int			checkminicmd(char *cmd)
 	return (0);
 }
 
-int			parse_files(t_tokens *tok, t_cmdTable *cmd, int type)
+int			parse_files(t_tokens *tok, t_cmdtable *cmd, int type)
 {
 	int		fd;
 
@@ -99,14 +98,14 @@ int			parse_files(t_tokens *tok, t_cmdTable *cmd, int type)
 	return (0);
 }
 
-int			insertargs(t_tokens *tok, t_cmdTable *cmd, int j)
+int			insertargs(t_tokens *tok, t_cmdtable *cmd, int j)
 {
 	int		i;
 
-	i = cmd->sCmd[j]->nArgs;
-	if (i >= cmd->sCmd[j]->nAvalArg)
+	i = cmd->scmd[j]->nargs;
+	if (i >= cmd->scmd[j]->navalarg)
 		return (-1);
-	cmd->sCmd[j]->args[++i] = ft_strdup(tok->data);
-	cmd->sCmd[j]->nArgs++;
+	cmd->scmd[j]->args[++i] = ft_strdup(tok->data);
+	cmd->scmd[j]->nargs++;
 	return (0);
 }

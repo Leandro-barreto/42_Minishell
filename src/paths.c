@@ -77,7 +77,6 @@ char		*checkpathvar(char *var, char *cmd, char **m_envp)
 	i[0] = 0;
 	i[1] = 0;
 	while (aux[i[0]])
-	{
 		if (aux[i[0]++] == ':')
 		{
 			aux2 = (char *)malloc(i[0] - i[1]);
@@ -87,7 +86,6 @@ char		*checkpathvar(char *var, char *cmd, char **m_envp)
 				return (aux2);
 			i[1] = i[0];
 		}
-	}
 	aux2 = (char *)malloc(i[0] - i[1] + 1);
 	ft_strlcpy(aux2, &aux[i[1]], i[0] - i[1] + 1);
 	aux2 = ft_strjoin(aux2, cmd);

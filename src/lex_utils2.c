@@ -30,7 +30,6 @@ t_tokens	*read_quotes(char *text, t_tokens *tok, t_lex *lex, t_lexpar *par)
 			tok->data[par->j++] = text[i];
 			end = i;
 			tok->quote = quote;
-			tok = end_current(tok, lex, par, par->textsize);
 			break ;
 		}
 	}

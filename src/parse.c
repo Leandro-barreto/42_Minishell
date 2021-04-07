@@ -6,25 +6,24 @@
 /*   By: lborges- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/20 19:03:49 by lborges-          #+#    #+#             */
-/*   Updated: 2020/01/21 19:04:33 by lborges-         ###   ########.fr       */
+/*   Updated: 2021/04/02 17:28:30 by user42           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int				insertcommand(char *text, int size, t_cmdTable *cmd, int j)
+int			insertcommand(char *text, int size, t_cmdtable *cmd, int j)
 {
-	printf("Size: %i\n", size);
-	cmd->sCmd[j]->args = (char **)malloc((size + 2) * sizeof(char *));
-	cmd->sCmd[j]->nAvalArg = size + 1;
-	cmd->sCmd[j]->nArgs = 0;
-	cmd->sCmd[j]->args[0] = ft_strdup(text);
-	cmd->sCmd[j]->args[size + 1] = NULL;
-	cmd->nSimpleCmd++;
+	cmd->scmd[j]->args = (char **)malloc((size + 2) * sizeof(char *));
+	cmd->scmd[j]->navalarg = size + 1;
+	cmd->scmd[j]->nargs = 0;
+	cmd->scmd[j]->args[0] = ft_strdup(text);
+	cmd->scmd[j]->args[size + 1] = NULL;
+	cmd->nsimplecmd++;
 	return (1);
 }
 
-int				parse_cmd(t_lex *lex, t_tokens *tok, t_cmdTable *cmd, char **m_envp)
+int			parse_cmd(t_lex *lex, t_tokens *tok, t_cmdtable *cmd, char **m_envp)
 {
 	int			count;
 	t_tokens	*tok_aux;
@@ -32,11 +31,11 @@ int				parse_cmd(t_lex *lex, t_tokens *tok, t_cmdTable *cmd, char **m_envp)
 
 	tok_aux = tok;
 	text = ft_strdup(tok->data);
-	cmd->sCmd[lex->j]->builtin = 0;
+	cmd->scmd[lex->j]->builtin = 0;
 	if (ispath(tok->data))
 		text = ft_strdup(tok->data);
 	else if (checkminicmd(tok->data))
-		cmd->sCmd[lex->j]->builtin = 1;
+		cmd->scmd[lex->j]->builtin = 1;
 	else
 		text = checkpathvar("PATH", tok->data, m_envp);
 	if (text == NULL && (lex->error = -127) < 0)
@@ -48,22 +47,23 @@ int				parse_cmd(t_lex *lex, t_tokens *tok, t_cmdTable *cmd, char **m_envp)
 			count++;
 		tok_aux = tok_aux->next;
 	}
+	errno = 0;
 	return (insertcommand(text, count, cmd, lex->j));
 }
 
-t_cmdTable		start_cmdtable(t_lex *lex, t_cmdTable ct)
+t_cmdtable	start_cmdtable(t_lex *lex, t_cmdtable ct)
 {
 	int			aux;
 	int			j;
 
 	lex->j = 0;
 	aux = 1 + lex->npipes[lex->curr];
-	ct.nAvalSimpleCmd = aux;
-	ct.nSimpleCmd = 0;
-	ct.sCmd = (t_simpleCmd **)malloc(sizeof(t_simpleCmd *) * aux);
+	ct.navalsimplecmd = aux;
+	ct.nsimplecmd = 0;
+	ct.scmd = (t_simplecmd **)malloc(sizeof(t_simplecmd *) * aux);
 	j = 0;
 	while (j < aux)
-		ct.sCmd[j++] = (t_simpleCmd *)malloc(sizeof(t_simpleCmd));
+		ct.scmd[j++] = (t_simplecmd *)malloc(sizeof(t_simplecmd));
 	ct.outfile = NULL;
 	ct.infile = NULL;
 	ct.errfile = NULL;
@@ -71,7 +71,7 @@ t_cmdTable		start_cmdtable(t_lex *lex, t_cmdTable ct)
 	return (ct);
 }
 
-int				parser_normfdp(t_lex *lex, t_cmdTable *cmdtable, int cmd)
+int			parser_normfdp(t_lex *lex, t_cmdtable *cmdtable, int cmd)
 {
 	cmd = 0;
 	lex->j = 0;
@@ -80,7 +80,7 @@ int				parser_normfdp(t_lex *lex, t_cmdTable *cmdtable, int cmd)
 	return (cmd);
 }
 
-void			parser_all(t_lex *lex, t_cmdTable *cmdtable, char **m_envp)
+void		parser_all(t_lex *lex, t_cmdtable *cmdtable, char **m_envp)
 {
 	t_tokens	*tok;
 	int			cmd;
@@ -92,7 +92,6 @@ void			parser_all(t_lex *lex, t_cmdTable *cmdtable, char **m_envp)
 	redir = 0;
 	while (tok && !lex->error)
 	{
-		checkdollar(tok, lex, m_envp);
 		if (tok->type == 0 && !cmd && !redir)
 			cmd = parse_cmd(lex, tok, &cmdtable[lex->curr], m_envp);
 		else if (tok->type == 0 && cmd && !redir && tok->data[0] != '\0')

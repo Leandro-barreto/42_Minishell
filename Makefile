@@ -1,4 +1,4 @@
-NAME = minishell
+NAME = minishell.a
 
 FLAGS = -Wall -Werror -Wextra 
 
@@ -9,10 +9,11 @@ SRCS = src/main.c		\
 	   src/execbuiltin.c		\
 	   src/execute.c		\
 	   src/export.c		\
+	   src/export_utils.c		\
 	   src/lex.c		\
 	   src/lex_utils.c		\
 	   src/lex_utils2.c		\
-	   src/parse_aux.c		\
+	   src/parse_utils.c		\
 	   src/parse.c			\
 	   src/paths.c	\
 	   src/unset.c		\

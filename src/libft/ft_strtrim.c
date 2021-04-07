@@ -54,6 +54,6 @@ char		*ft_strtrim(char const *s1, char const *set)
 		else
 			break ;
 	}
-	cont = marcador[0] > marcador[1] ? 0 : marcador[1] - marcador[0] + 1;
+	cont = marcador[0] > marcador[1] ? 0 : marcador[1] - marcador[0] - 1;
 	return (ft_substr(s1, marcador[0], cont));
 }

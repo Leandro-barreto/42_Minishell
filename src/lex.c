@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-static int		verifychar(char *c, t_lexpar *par, t_lex *lex)
+static int	verifychar(char *c, t_lexpar *par, t_lex *lex)
 {
 	if (*c == '\'')
 		return (SQUOTE);
@@ -41,7 +41,7 @@ static int		verifychar(char *c, t_lexpar *par, t_lex *lex)
 	return (0);
 }
 
-t_tokens		*end_current(t_tokens *tok, t_lex *lex, t_lexpar *par, int length)
+t_tokens	*end_current(t_tokens *tok, t_lex *lex, t_lexpar *par, int length)
 {
 	tok->data[par->j] = '\0';
 	tok->next = (t_tokens *)malloc(sizeof(t_tokens));
@@ -61,7 +61,7 @@ t_tokens		*end_current(t_tokens *tok, t_lex *lex, t_lexpar *par, int length)
 	return (tok);
 }
 
-t_tokens		*lexer2(char *text, t_tokens *tokens, t_lex *lex, t_lexpar *par)
+t_tokens	*lexer2(char *text, t_tokens *tokens, t_lex *lex, t_lexpar *par)
 {
 	if (par->c == SQUOTE || par->c == DQUOTE)
 	{
@@ -88,7 +88,7 @@ t_tokens		*lexer2(char *text, t_tokens *tokens, t_lex *lex, t_lexpar *par)
 	return (tokens);
 }
 
-int				lexer(char *text, t_lex *lex, int textsize)
+int			lexer(char *text, t_lex *lex, int textsize)
 {
 	t_lexpar	*par;
 	t_tokens	*tok;
@@ -113,11 +113,11 @@ int				lexer(char *text, t_lex *lex, int textsize)
 	if (lex->data->type == '|' || lex->data->type == ';')
 		lex->errmsg = ft_strdup(ft_strjoin(lex->data->data, "\'\n"));
 	tok = lex->data;
-	//Descomnetar para imprimir tokens.
-//	while (tok)
-//	{
-//		printf("Data %s\n", tok->data);
-//		tok = tok->next;
-//	}
-	return (checktokens(lex, lex->data));
+	//// Descomnetar para imprimir tokens.
+	// while (tok)
+	// {
+	// 	printf("Data %s\n", tok->data);
+	// 	tok = tok->next;
+	// }
+	// return (checktokens(lex, lex->data));
 }

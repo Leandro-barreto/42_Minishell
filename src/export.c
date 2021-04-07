@@ -59,6 +59,8 @@ int		add_envp(char **m_envp, char *var, char *value, int i)
 {
 	int	j;
 
+	var = remove_quotes(var);
+	value = remove_quotes(value);
 	j = 0;
 	while (var[j])
 	{
@@ -78,6 +80,8 @@ int		add_envp(char **m_envp, char *var, char *value, int i)
 
 int		exportnorm(char *var, char *value, char **m_envp, int flag)
 {
+	var = remove_quotes(var);
+	value = remove_quotes(value);
 	if (ft_strnstr(*m_envp, var, ft_strlen(var)))
 	{
 		if (!flag)
@@ -89,7 +93,7 @@ int		exportnorm(char *var, char *value, char **m_envp, int flag)
 	return (flag);
 }
 
-int		miniexport(t_simpleCmd *scmd, char **m_envp)
+int		miniexport(t_simplecmd *scmd, char **m_envp)
 {
 	char	*var;
 	char	*value;
@@ -98,9 +102,9 @@ int		miniexport(t_simpleCmd *scmd, char **m_envp)
 	int		flag;
 
 	i = 0;
-	if (!scmd->nArgs)
+	if (!scmd->nargs)
 		exportall(m_envp, &var, &value);
-	while (++i <= scmd->nArgs)
+	while (++i <= scmd->nargs)
 	{
 		flag = split_once(scmd->args[i], '=', &var, &value);
 		j = -1;

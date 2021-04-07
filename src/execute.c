@@ -6,39 +6,40 @@
 /*   By: lborges- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/20 19:03:49 by lborges-          #+#    #+#             */
-/*   Updated: 2020/01/21 19:04:33 by lborges-         ###   ########.fr       */
+/*   Updated: 2021/04/02 18:55:30 by user42           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int			exec_builtin(t_cmdTable *cmd, int i, char **m_envp, t_lex *lex)
+int			exec_builtin(t_cmdtable *cmd, int i, char **m_envp, t_lex *lex)
 {
-	if (!ft_strncmp(cmd->sCmd[i]->args[0], "echo", 4))
-		return (miniecho(cmd->sCmd[i]));
-	else if (!ft_strncmp(cmd->sCmd[i]->args[0], "cd", 2))
-		return (minicd(cmd->sCmd[i], m_envp));
-	else if (!ft_strncmp(cmd->sCmd[i]->args[0], "pwd", 3))
-		return (minipwd(cmd->sCmd[i]));
-	else if (!ft_strncmp(cmd->sCmd[i]->args[0], "env", 3))
-		return (minienv(cmd->sCmd[i], m_envp));
-	else if (!ft_strncmp(cmd->sCmd[i]->args[0], "unset", 5))
-		return (miniunset(cmd->sCmd[i], m_envp));
-	else if (!ft_strncmp(cmd->sCmd[i]->args[0], "export", 6))
-		return (miniexport(cmd->sCmd[i], m_envp));
-	else if (!ft_strncmp(cmd->sCmd[i]->args[0], "exit", 4))
+	if (!ft_strncmp(cmd->scmd[i]->args[0], "echo", 4))
+		return (miniecho(cmd->scmd[i]));
+	else if (!ft_strncmp(cmd->scmd[i]->args[0], "cd", 2))
+		return (minicd(cmd->scmd[i], m_envp));
+	else if (!ft_strncmp(cmd->scmd[i]->args[0], "pwd", 3))
+		return (minipwd(cmd->scmd[i]));
+	else if (!ft_strncmp(cmd->scmd[i]->args[0], "env", 3))
+		return (minienv(cmd->scmd[i], m_envp));
+	else if (!ft_strncmp(cmd->scmd[i]->args[0], "unset", 5))
+		return (miniunset(cmd->scmd[i], m_envp));
+	else if (!ft_strncmp(cmd->scmd[i]->args[0], "export", 6))
+		return (miniexport(cmd->scmd[i], m_envp));
+	else if (!ft_strncmp(cmd->scmd[i]->args[0], "exit", 4))
 		return (miniexit(cmd, lex, i));
 	return (12);
 }
 
-void		handle_fd(t_exec *exec, t_cmdTable *cmd)
+void		handle_fd(t_exec *exec, t_cmdtable *cmd)
 {
 	dup2(exec->fdin, 0);
 	close(exec->fdin);
-	if (exec->i == cmd->nSimpleCmd - 1)
+	if (exec->i == cmd->nsimplecmd - 1)
 	{
 		if (cmd->outfile && cmd->outtype == '>')
-			exec->fdout = open(cmd->outfile, O_WRONLY | O_CREAT, 0666);
+			exec->fdout = open(cmd->outfile, O_WRONLY | O_CREAT |
+					O_TRUNC, 0666);
 		else if (cmd->outfile && cmd->outtype == GGREATER)
 			exec->fdout = open(cmd->outfile, O_WRONLY | O_APPEND |
 					O_CREAT, 0666);
@@ -55,14 +56,14 @@ void		handle_fd(t_exec *exec, t_cmdTable *cmd)
 	close(exec->fdout);
 }
 
-t_simpleCmd	*handlequotes(t_simpleCmd *scmd)
+t_simplecmd	*handlequotes(t_simplecmd *scmd)
 {
 	int		i;
 	int		j;
 	int		size;
 
 	i = -1;
-	while (++i <= scmd->nArgs)
+	while (++i <= scmd->nargs)
 	{
 		if (scmd->args[i][0] == '\"' || scmd->args[i][0] == '\'')
 		{
@@ -79,31 +80,33 @@ t_simpleCmd	*handlequotes(t_simpleCmd *scmd)
 	return (scmd);
 }
 
-void		handle_exec(t_exec *exec, t_cmdTable *cmd, char **m_envp, t_lex *lex)
+void		handle_exec(t_exec *ex, t_cmdtable *cmd, char **m_envp, t_lex *lex)
 {
 	int		i;
 	char	*cmdtext;
+	int		j;
 
-	i = exec->i;
-	if (cmd->sCmd[i]->builtin == 1)
+	j = -1;
+	i = ex->i;
+	while (++j <= cmd->scmd[i]->nargs)
+		cmd->scmd[i]->args[j] = checkdollar(cmd->scmd[i]->args[j], lex, m_envp);
+	if (cmd->scmd[i]->builtin == 1)
 		lex->exit = exec_builtin(cmd, i, m_envp, lex);
 	else
 	{
-		exec->ret = fork();
-		if (exec->ret == 0)
+		ex->ret = fork();
+		if (ex->ret == 0)
 		{
 			signal(SIGINT, NULL);
-			cmdtext = ft_strdup(cmd->sCmd[i]->args[0]);
-			cmd->sCmd[i] = handlequotes(cmd->sCmd[i]);
-			lex->exit = execve(cmdtext, cmd->sCmd[i]->args, m_envp);
-			if (lex->exit < 0)
-				lex->exit = printerror(lex->exit, 0, cmd->sCmd[i]->args[0], 0);
-			exit(0);
+			cmdtext = ft_strdup(cmd->scmd[i]->args[0]);
+			cmd->scmd[i] = handlequotes(cmd->scmd[i]);
+			lex->exit = execve(cmdtext, cmd->scmd[i]->args, m_envp);
+			exit(lex->exit);
 		}
 	}
 }
 
-int			execute_cmd(t_cmdTable *cmd, char **m_envp, t_lex *lex)
+int			execute_cmd(t_cmdtable *cmd, char **m_envp, t_lex *lex)
 {
 	t_exec	*exec;
 
@@ -115,7 +118,7 @@ int			execute_cmd(t_cmdTable *cmd, char **m_envp, t_lex *lex)
 	if (cmd->infile)
 		exec->fdin = open(cmd->infile, O_RDONLY);
 	exec->i = 0;
-	while (exec->i < cmd->nSimpleCmd)
+	while (exec->i < cmd->nsimplecmd)
 	{
 		handle_fd(exec, cmd);
 		handle_exec(exec, cmd, m_envp, lex);

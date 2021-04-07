@@ -38,23 +38,23 @@ void	writeecho(char *text)
 	}
 }
 
-int		miniecho(t_simpleCmd *scmd)
+int		miniecho(t_simplecmd *scmd)
 {
 	int	i;
 	int	flag;
 
 	i = 1;
 	flag = 0;
-	while ((i <= scmd->nArgs) && !(ft_strncmp(scmd->args[i], "-n", 2)))
+	while ((i <= scmd->nargs) && !(ft_strncmp(scmd->args[i], "-n", 2)))
 	{
 		i++;
 		flag++;
 	}
-	printf("Nargs: %i\n", scmd->nArgs);
-	while (i <= scmd->nArgs)
+	printf("nargs: %i\n", scmd->nargs);
+	while (i <= scmd->nargs)
 	{
 		writeecho(scmd->args[i]);
-		if (i < scmd->nArgs)
+		if (i < scmd->nargs)
 			write(1, " ", 1);
 		i++;
 	}

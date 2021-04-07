@@ -33,7 +33,7 @@ int		destroy_structs(t_lex *lex, t_lexpar *par)
 	return (0);
 }
 
-void	delete_table(t_cmdTable *cmdtable, t_lex *lex)
+void	delete_table(t_cmdtable *cmdtable, t_lex *lex)
 {
 	int	i;
 	int	j;
@@ -45,14 +45,14 @@ void	delete_table(t_cmdTable *cmdtable, t_lex *lex)
 	while (i >= 0)
 	{
 		j = 0;
-		while (j < cmdtable[i].nSimpleCmd)
+		while (j < cmdtable[i].nsimplecmd)
 		{
 			k = 0;
-			while (k < cmdtable[i].sCmd[j]->nArgs)
+			while (k < cmdtable[i].scmd[j]->nargs)
 			{
-				free(cmdtable[i].sCmd[j]->args[k++]);
+				free(cmdtable[i].scmd[j]->args[k++]);
 			}
-			free(cmdtable[i].sCmd[j]);
+			free(cmdtable[i].scmd[j]);
 			j++;
 		}
 		i--;

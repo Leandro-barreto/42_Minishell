@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   unset.c                                            :+:      :+:    :+:   */
+/*   export.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lborges- <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -12,54 +12,19 @@
 
 #include "minishell.h"
 
-void	delete_envvar(char **m_envp, char *var)
+char	*remove_quotes(char *var)
 {
-	int	j;
+	int	writer;
+	int	reader;
 
-	j = -1;
-	while (m_envp[++j])
+	writer = 0;
+	reader = 0;
+	while (var[reader])
 	{
-		if (ft_strnstr(m_envp[j], var, ft_strlen(var)))
-		{
-			if (!m_envp[j + 1])
-				m_envp[j] = 0;
-			else
-			{
-				while (m_envp[j])
-				{
-					m_envp[j] = m_envp[j + 1];
-					j++;
-				}
-				break ;
-			}
-		}
+		if (var[reader] != '\'' && var[reader] != '\"')
+			var[writer++] = var[reader];
+		reader++;
 	}
-}
-
-int		miniunset(t_simplecmd *scmd, char **m_envp)
-{
-	char	*var;
-	int		i;
-	int		j;
-	char	c;
-
-	i = 0;
-	while (++i <= scmd->nargs)
-	{
-		j = -1;
-		while (scmd->args[i][++j])
-		{
-			c = scmd->args[i][j];
-			if (!(ft_isalnum(c) || c == '_'))
-			{
-				printf("mini: unset: %s: ", scmd->args[i]);
-				printf("not a valid identifier\n");
-				fflush(stdout);
-				return (1);
-			}
-		}
-		var = ft_strjoin(scmd->args[i], "=");
-		delete_envvar(m_envp, var);
-	}
-	return (0);
+	var[writer] = 0;
+	return (var);
 }
