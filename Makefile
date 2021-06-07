@@ -1,30 +1,54 @@
-NAME = minishell
-LIB = ./libft/libft.a
-LEXER = ./lexer
-PARSER = ./parser
-TREE = ./tree
-CMD	 = ./cmd
-EXEC = ./exec
+NAME = minishell.a
+EX = minishell
 
-SRCS = minishell.c parse.c\
-	   $(LEXER)/lex.c $(LEXER)/lex_utils.c\
+FLAGS = -Wall -Werror -Wextra -ltermcap
 
-OBJS = $(SRCS:.c=.o)
-RM = rm -f
-CFLAGS = -Wall -Werror -Wextra
+SRCS = src/main.c		\
+	   src/cd.c	\
+	   src/delete.c	\
+	   src/echo.c	\
+	   src/erro.c		\
+	   src/execbuiltin.c		\
+	   src/execute.c		\
+	   src/execute_utils.c		\
+	   src/export.c		\
+	   src/lex.c		\
+	   src/lex_utils.c		\
+	   src/lex_utils2.c		\
+	   src/parse_aux.c\
+	   src/parse_dollar.c\
+	   src/parse.c\
+	   src/paths.c\
+	   src/unset.c\
+	   src/termcap.c\
+	   src/termcap_utils.c\
+	   src/termcap_utils2.c\
+	   src/ft_exit.c\
+	   src/ft_isin.c\
+	   src/environment.c
 
-$(NAME): $(OBJS)
-	@cd libft && make
-	@cd lexer && clang $(CFLAGS) -c *.c 
-	@clang $(CFLAGS) $(OBJS) $(LIB) -o $(NAME) 
+OBJS = $(SRCS:.s=.o)
+
+UTILS = src/libft/libft.a 
+		#src/libft/ft_printf/libftprintf.a
+
 all: $(NAME)
 
+$(NAME): $(OBJS)
+	@cd src/libft && make
+	@ar rc $(NAME) $(OBJS) 
+	@clang $(FLAGS) $(OBJS) $(UTILS) -o $(EX)
+
+%.o: %.c
+	@clang $(FLAGS) $<
+
 clean:
-	$(RM) $(OBJS) 
+	@rm -f $(O)
 
 fclean: clean
-	$(RM) $(NAME)
+	@rm -f $(NAME) $(EX)
 
 re: fclean all
 
 .PHONY: all clean fclean
+.PRECIOUS: minishell
